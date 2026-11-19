@@ -29,6 +29,7 @@ export interface OrbitState {
   chat: ChatMessage[];
   laptop: { mode: "lan" | "tailscale" | "custom"; endpoint: string };
   readNotifications: string[];
+  paceOutfit?: "apricot" | "lagoon" | "berry" | "sunshine";
 }
 
 export const DEFAULT_STATE: OrbitState = {

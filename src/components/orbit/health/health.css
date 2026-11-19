@@ -175,3 +175,97 @@
   .health-history [role="grid"] button { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) { .health-area *, .health-area *::before, .health-area *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* Pace's original layered illustration, all palette choices scoped to Health. */
+.health-area {
+  --pace-skin-light: oklch(0.92 0.035 62);
+  --pace-skin: oklch(0.82 0.071 54);
+  --pace-skin-shade: oklch(0.65 0.087 48);
+  --pace-blush: oklch(0.74 0.105 35 / 0.45);
+  --pace-hat: oklch(0.5 0.079 220);
+  --pace-hat-light: oklch(0.67 0.075 210);
+  --pace-pants: oklch(0.77 0.086 169);
+  --pace-pants-light: oklch(0.89 0.053 167);
+  --pace-pants-shade: oklch(0.57 0.077 178);
+  --pace-shoe: oklch(0.85 0.143 87);
+  --pace-shoe-light: oklch(0.95 0.075 95);
+  --pace-shoe-shade: oklch(0.7 0.125 76);
+}
+.pace-outfit-apricot { --pace-jacket: oklch(0.76 0.145 49); --pace-jacket-light: oklch(0.89 0.093 60); --pace-jacket-shade: oklch(0.61 0.13 39); }
+.pace-outfit-lagoon { --pace-jacket: oklch(0.66 0.104 214); --pace-jacket-light: oklch(0.87 0.062 207); --pace-jacket-shade: oklch(0.47 0.086 224); }
+.pace-outfit-berry { --pace-jacket: oklch(0.66 0.14 7); --pace-jacket-light: oklch(0.86 0.084 8); --pace-jacket-shade: oklch(0.48 0.12 2); }
+.pace-outfit-sunshine { --pace-jacket: oklch(0.84 0.139 86); --pace-jacket-light: oklch(0.95 0.077 93); --pace-jacket-shade: oklch(0.64 0.12 67); }
+.pace-companion { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 190px; min-height: 222px; padding: 24px; margin: 0 0 24px; border-radius: 28px; background: var(--surface); box-shadow: var(--health-shadow); overflow: hidden; }
+.pace-companion-copy { position: relative; z-index: 1; align-self: center; padding-right: 10px; }
+.pace-eyebrow { font-size: 9px; font-weight: 700; color: var(--muted-foreground); }
+.pace-companion h2 { font-size: 26px; margin: 8px 0; }
+.pace-speech { font-size: 13px; line-height: 1.65; max-width: 320px; min-height: 44px; }
+.pace-controls { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 8px; }
+.health-area .pace-controls button { font-size: 11px; padding: 0 11px; min-height: 44px; height: auto; }
+.pace-cheer-control { color: var(--primary); background: var(--accent); }
+.pace-disclaimer { font-size: 9px; line-height: 1.6; color: var(--muted-foreground); margin-top: 8px; }
+.health-area .pace-character-button { width: 190px; height: 210px; padding: 0; border-radius: 0; background: transparent; position: relative; align-self: center; }
+.health-area .pace-character-button:hover { background: transparent; }
+.health-area .pace-character-button svg { width: 100%; height: 100%; }
+.pace-mascot { overflow: visible; }
+.pace-body, .pace-ground, .pace-head, .pace-eyes, .pace-arm, .pace-leg { transform-box: view-box; }
+.pace-body { transform-origin: 140px 260px; }
+.pace-head { transform-origin: 136px 144px; }
+.pace-eyes { transform-origin: 140px 103px; translate: var(--pace-gaze,0px) 0; transition: translate 220ms ease; }
+.pace-arm-front { transform-origin: 104px 159px; }
+.pace-arm-back { transform-origin: 170px 159px; }
+.pace-leg-front { transform-origin: 123px 207px; }
+.pace-leg-back { transform-origin: 151px 207px; }
+.pace-ground { transform-origin: 140px 283px; }
+.pace-active.pace-idle .pace-body { animation: pace-breathe 4s ease-in-out infinite; }
+.pace-active .pace-eyes { animation: pace-blink 6s ease-in-out infinite; }
+.pace-active.pace-wave .pace-arm-front { animation: pace-wave 0.5s ease-in-out 4; }
+.pace-active.pace-wave .pace-body { animation: pace-pop 0.5s ease-in-out 1; }
+.pace-active.pace-run .pace-arm-front, .pace-active.pace-run .pace-leg-back { animation: pace-swing 0.7s ease-in-out infinite alternate; }
+.pace-active.pace-run .pace-arm-back, .pace-active.pace-run .pace-leg-front { animation: pace-swing 0.7s ease-in-out infinite alternate-reverse; }
+.pace-active.pace-run .pace-body { animation: pace-bob 0.7s ease-in-out infinite; }
+.pace-active.pace-run .pace-ground { animation: pace-shadow 0.7s ease-in-out infinite; }
+.pace-active.pace-cheer .pace-arm-front, .pace-active.pace-celebrate .pace-arm-front { animation: pace-wave 0.6s ease-in-out 3; }
+.pace-active.pace-cheer .pace-arm-back, .pace-active.pace-celebrate .pace-arm-back { animation: pace-reward-arm 0.6s ease-in-out 3; }
+.pace-active.pace-cheer .pace-body, .pace-active.pace-celebrate .pace-body { animation: pace-dance 0.65s ease-in-out 3; }
+.pace-active.pace-mood-rest.pace-idle .pace-head { transform: rotate(-6deg); }
+.pace-mood-waiting .pace-smile, .pace-mood-rest .pace-smile { transform: scaleY(0.65); transform-origin: 140px 130px; }
+.pace-active .pace-sparkles { animation: pace-sparkle 1.1s ease-out 2; transform-origin: center; }
+.health-area .pace-wardrobe-toggle { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; background: var(--surface-2); z-index: 2; }
+.pace-wardrobe { grid-column: 1 / -1; margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px; }
+.pace-wardrobe legend { font-size: 12px; font-weight: 700; padding-top: 12px; }
+.pace-wardrobe > div { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 4px; }
+.health-area .pace-wardrobe button { flex-direction: column; gap: 5px; padding: 8px 2px; height: 65px; font-size: 9px; text-transform: capitalize; border-radius: 16px; }
+.pace-swatch { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,var(--pace-jacket-light),var(--pace-jacket-shade)); border: 2px solid var(--surface); }
+.pace-wardrobe p { font-size: 9px; color: var(--muted-foreground); margin-top: 9px; }
+.pace-preview { grid-template-columns: 1fr; padding: 22px; margin: 0; background: linear-gradient(150deg,var(--surface),var(--accent)); }
+.pace-preview .pace-companion-copy { padding-right: 0; }
+.health-area .pace-preview .pace-character-button { grid-row: 1; width: 100%; height: 260px; margin-bottom: 10px; }
+.pace-preview .pace-speech { max-width: none; min-height: 44px; }
+.pace-preview .pace-controls button { flex: 1; }
+.pace-preview .pace-wardrobe { grid-column: 1; }
+@keyframes pace-breathe { 50% { transform: translateY(-3px) scaleY(1.015); } }
+@keyframes pace-blink { 0%,43%,47%,100% { transform: scaleY(1); } 45% { transform: scaleY(0.08); } }
+@keyframes pace-wave { 0%,100% { transform: rotate(10deg); } 50% { transform: rotate(48deg); } }
+@keyframes pace-reward-arm { 50% { transform: rotate(-35deg); } }
+@keyframes pace-pop { 50% { transform: translateY(-9px) scale(1.04); } }
+@keyframes pace-swing { from { transform: rotate(-20deg); } to { transform: rotate(23deg); } }
+@keyframes pace-bob { 50% { transform: translateY(-7px) rotate(2deg); } }
+@keyframes pace-shadow { 50% { transform: scaleX(0.8); opacity: 0.6; } }
+@keyframes pace-dance { 25% { transform: translateY(-8px) rotate(-5deg); } 75% { transform: translateY(-8px) rotate(5deg); } }
+@keyframes pace-sparkle { 0% { opacity: 0; transform: scale(0.7); } 25% { opacity: 1; } 100% { opacity: 0; transform: scale(1.18) translateY(-8px); } }
+@media (max-width: 767px) {
+  .pace-companion:not(.pace-preview) { padding: 14px 15px 64px; grid-template-columns: minmax(0,1fr) 138px; min-height: 218px; }
+  .pace-companion:not(.pace-preview) .pace-companion-copy { position: static; }
+  .pace-companion h2 { font-size: 23px; }
+  .pace-companion:not(.pace-preview) .pace-eyebrow { font-size: 8px; }
+  .pace-companion:not(.pace-preview) .pace-speech { font-size: 11px; min-height: 55px; }
+  .health-area .pace-character-button { width: 138px; height: 145px; }
+  .pace-companion:not(.pace-preview) .pace-controls { position: absolute; bottom: 23px; left: 15px; right: 15px; gap: 8px; }
+  .health-area .pace-companion:not(.pace-preview) .pace-controls button { font-size: 10px; padding: 0 8px; }
+  .pace-companion:not(.pace-preview) .pace-disclaimer { position: absolute; bottom: 9px; left: 15px; font-size: 8px; margin: 0; }
+  .pace-companion:not(.pace-preview):has(.pace-wardrobe) { padding-bottom: 14px; }
+  .pace-companion:not(.pace-preview):has(.pace-wardrobe) .pace-controls { position: static; grid-column: 1 / -1; }
+  .pace-companion:not(.pace-preview):has(.pace-wardrobe) .pace-disclaimer { display: none; }
+  .pace-companion:not(.pace-preview):has(.pace-wardrobe) .pace-companion-copy { padding-bottom: 40px; }
+}

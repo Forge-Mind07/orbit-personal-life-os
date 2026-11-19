@@ -17,6 +17,7 @@ import { StepTracker, DateStrip, recentDates } from "@/components/orbit/health/S
 import { ActivityDetail } from "@/components/orbit/health/ActivityDetail";
 import { StartActivity } from "@/components/orbit/health/StartActivity";
 import { HealthReveal } from "@/components/orbit/health/HealthMotion";
+import { PaceCompanion } from "@/components/orbit/health/PaceCompanion";
 import "@/components/orbit/health/health.css";
 
 export const Route = createFileRoute("/health")({
@@ -57,6 +58,7 @@ function Health() {
     </header>
     <div className="health-date-heading"><p>{fmt(selected, "EEEE, d MMM")}</p><Button variant="ghost" onClick={() => setSelected(today)} disabled={selected === today}>Today</Button></div>
     <DateStrip dates={dates} selected={selected} onSelect={setSelected} id="overview" />
+    <PaceCompanion day={day} enabled={!startOpen} />
     <div className="health-layout">
       <div className="health-primary-column">
         <HealthReveal><StepTracker today={today} selected={selected} goal={goal} dates={dates} onSelect={setSelected} onEdit={() => setGoalOpen(true)} /></HealthReveal>
@@ -80,7 +82,7 @@ function Health() {
     <section className="health-insights"><div className="health-section-title"><h2>A little perspective</h2><span>FROM YOUR ACTIVITY</span></div><Insights /></section>
     <DayInspector date={inspected} onClose={() => setInspected(null)} />
     <GoalSheet open={goalOpen} onOpenChange={setGoalOpen} />
-    <StartActivity open={startOpen} onOpenChange={setStartOpen} />
+    <StartActivity open={startOpen} onOpenChange={setStartOpen} day={day} />
     <p className="health-bottom-note">ORBIT Health · demo only · no connected sensors</p>
   </div></MotionConfig>;
 }
