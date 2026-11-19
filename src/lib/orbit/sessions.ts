@@ -6,6 +6,7 @@ export interface ChatSession {
   createdAt: number;
   updatedAt: number;
   messages: ChatMessage[];
+  titleEdited?: boolean;
 }
 export interface SessionState {
   chatSessions: ChatSession[];
@@ -25,7 +26,7 @@ export function migrateSessions(state: { chat?: ChatMessage[]; chatSessions?: Ch
 }
 export function appendMessage<T extends SessionState>(state: T, sessionId: string, message: ChatMessage): T {
   return { ...state, chatSessions: state.chatSessions.map((s) => s.id !== sessionId || s.messages.some((m) => m.id === message.id) ? s : {
-    ...s, title: s.messages.length === 0 && message.role === "user" ? message.text.trim().slice(0, 45) : s.title,
+    ...s, title: !s.titleEdited && s.messages.length === 0 && message.role === "user" ? message.text.trim().slice(0, 45) : s.title,
     updatedAt: message.ts, messages: [...s.messages, message],
   }) };
 }
@@ -40,5 +41,5 @@ export function deleteSession<T extends SessionState>(state: T, id: string): T {
 }
 export function renameSession<T extends SessionState>(state: T, id: string, title: string): T {
   if (!title.trim()) return state;
-  return { ...state, chatSessions: state.chatSessions.map((s) => s.id === id ? { ...s, title: title.trim().slice(0, 100) } : s) };
+  return { ...state, chatSessions: state.chatSessions.map((s) => s.id === id ? { ...s, title: title.trim().slice(0, 100), titleEdited: true } : s) };
 }

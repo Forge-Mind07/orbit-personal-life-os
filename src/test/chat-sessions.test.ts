@@ -3,6 +3,11 @@ import { appendMessage, blankSession, deleteSession, migrateSessions, renameSess
 import type { ChatMessage } from "@/lib/orbit/chat";
 const msg = (id: string, role: ChatMessage["role"] = "user"): ChatMessage => ({ id, role, text: "How are my expenses this month?", ts: 10 });
 describe("conversation sessions", () => {
+  it("a name assigned to a blank conversation survives its first message", () => {
+    const s = { chatSessions: [blankSession("one", 1)], activeSessionId: "one" };
+    const next = appendMessage(renameSession(s, "one", "My plans"), "one", msg("first"));
+    expect(next.chatSessions[0]?.title).toBe("My plans");
+  });
   it("manual rename survives later replies and changes only the selected title", () => {
     const s = { chatSessions: [blankSession("one", 1), blankSession("two", 2)], activeSessionId: "one" };
     const renamed = renameSession(appendMessage(s, "one", msg("a")), "one", "Daily check-in");
