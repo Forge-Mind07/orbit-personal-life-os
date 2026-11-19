@@ -138,8 +138,9 @@
 .health-range-tabs { border: 0; background: var(--surface); border-radius: 999px; margin-bottom: 20px; max-width: 520px; }
 .health-area .health-range-tabs button, .health-area .health-range-tabs button > span:first-child { border-radius: 999px; }
 .health-area .card-orbit { border: 0; border-radius: 24px; box-shadow: var(--health-shadow); }
-.health-history [role="grid"] { gap: 3px; }
-.health-area .health-history [role="grid"] button { padding: 0; min-height: 44px; min-width: 0; font-size: 11px; border-radius: 14px; }
+.health-history [role="grid"], .health-calendar-weekdays { gap: 3px; max-width: 520px; margin-left: auto; margin-right: auto; }
+.health-area .health-history [role="grid"] button { padding: 0; width: 100%; height: auto; min-height: 44px; min-width: 0; font-size: 11px; border-radius: 14px; }
+.health-area .health-history [data-status="nodata"] { border: 1px dashed var(--muted-foreground); background: transparent; }
 .health-history [role="tabpanel"] { min-height: 360px; }
 .health-insights article { height: 100%; }
 .health-bottom-note { text-align: center; color: var(--muted-foreground); font-size: 10px; margin-top: 30px; }

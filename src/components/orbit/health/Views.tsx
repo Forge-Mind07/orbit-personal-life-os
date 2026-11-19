@@ -128,7 +128,7 @@ export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
     <div className="space-y-5">
       <div className="card-orbit p-5">
         <Pager label={fmt(anchor, "MMMM yyyy")} onPrev={() => setOffset((o) => o - 1)} onNext={() => setOffset((o) => Math.min(0, o + 1))} canNext={offset < 0} />
-        <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-semibold text-muted-foreground">
+        <div className="health-calendar-weekdays grid grid-cols-7 gap-1.5 text-center text-[11px] font-semibold text-muted-foreground">
           {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i}>{d}</span>)}
         </div>
         <div className="mt-2 grid grid-cols-7 gap-1.5" role="grid" aria-label={`Calendar for ${fmt(anchor, "MMMM")}`}>
@@ -140,6 +140,7 @@ export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
             return (
               <Button variant="ghost"
                 key={d.date}
+                data-status={st}
                 onClick={() => onSelect(d.date)}
                 aria-label={`${fmt(d.date, "d MMMM")}: ${STATUS_LABEL[st]}${d.steps !== null ? `, ${d.steps} steps` : ""}${refl ? `, reflection ${refl.reason}` : ""}`}
                 className={cn(
