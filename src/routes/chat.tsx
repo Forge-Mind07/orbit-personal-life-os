@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, Footprints, Laptop, Mic, Orbit, Plus, BookOpen, Wallet, ChartNoAxesCombined, MessageSquare, ShieldCheck } from "lucide-react";
+import { ArrowUp, Footprints, Laptop, Mic, Orbit, Plus, BookOpen, Wallet, ChartNoAxesCombined, ShieldCheck, PanelLeftOpen, PanelLeftClose, X } from "lucide-react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { useOrbit } from "@/lib/orbit/store";
 import { QUICK_PROMPTS, demoReply } from "@/lib/orbit/chat";
 import { ChatArt } from "@/components/orbit/chat/ChatArt";
 import { MessageBubble } from "@/components/orbit/chat/MessageBubble";
 import { VoiceMode } from "@/components/orbit/chat/VoiceMode";
+import { SessionHistory } from "@/components/orbit/chat/SessionHistory";
+import { appendMessage, blankSession, startSession } from "@/lib/orbit/sessions";
 import "@/components/orbit/chat/chat.css";
 
 export const Route = createFileRoute("/chat")({
@@ -30,63 +33,74 @@ const SUGGESTIONS = [
 function Chat() {
   const { state, update, today, allExpenses } = useOrbit();
   const [text, setText] = useState("");
-  const [typing, setTyping] = useState(false);
+  const [pending, setPending] = useState<string[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [desktop, setDesktop] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const busy = useRef(false);
+  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const sequence = useRef(0);
   const end = useRef<HTMLDivElement>(null);
   const composer = useRef<HTMLTextAreaElement>(null);
   const closeVoice = useCallback(() => setVoiceOpen(false), []);
-  const msgs = state.chat;
-  const history = msgs.filter((m) => m.role === "user");
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const activeId = state.activeSessionId;
+  const msgs = state.chatSessions.find((s) => s.id === activeId)?.messages ?? [];
+  const typing = activeId !== null && pending.includes(activeId);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const sync = () => { setDesktop(media.matches); if (media.matches) setHistoryOpen(false); };
+    sync(); media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+  useEffect(() => () => { timers.current.forEach(clearTimeout); timers.current.clear(); }, []);
   useEffect(() => {
     if (!msgs.length && !typing) return;
-    end.current?.scrollIntoView({ behavior: "auto", block: "nearest" });
-  }, [msgs.length, typing]);
-  const respond = (prompt: string) => {
-    busy.current = true; setTyping(true);
-    timer.current = setTimeout(() => {
+    const log = end.current?.parentElement;
+    if (log) log.scrollTop = log.scrollHeight;
+  }, [msgs.length, typing, activeId]);
+  const respond = (prompt: string, sessionId: string) => {
+    if (timers.current.has(sessionId)) return;
+    setPending((ids) => [...ids, sessionId]);
+    const timer = setTimeout(() => {
+      if (timers.current.get(sessionId) !== timer) return;
       const r = demoReply(prompt, { today, goal: state.stepGoal, budget: state.budget, expenses: allExpenses, topics: state.topics, city: state.city });
       sequence.current += 1;
-      update((s) => ({ ...s, chat: [...s.chat, { id: `a-${Date.now()}-${sequence.current}`, role: "assistant", text: r.text, ts: Date.now(), status: r.error ? "error" : undefined }] }));
-      busy.current = false; setTyping(false); timer.current = null;
+      update((s) => appendMessage(s, sessionId, { id: `a-${Date.now()}-${sequence.current}`, role: "assistant", text: r.text, ts: Date.now(), status: r.error ? "error" : undefined }));
+      timers.current.delete(sessionId); setPending((ids) => ids.filter((id) => id !== sessionId));
     }, 1100);
+    timers.current.set(sessionId, timer);
   };
   const send = (raw: string) => {
     const t = raw.trim();
-    if (!t || busy.current) return;
+    if (!t || (activeId && timers.current.has(activeId))) return;
+    const sessionId = activeId ?? `session-${Date.now()}-${++sequence.current}`;
     sequence.current += 1;
-    update((s) => ({ ...s, chat: [...s.chat, { id: `u-${Date.now()}-${sequence.current}`, role: "user", text: t, ts: Date.now() }] }));
-    setText(""); respond(t);
+    const message = { id: `u-${Date.now()}-${sequence.current}`, role: "user" as const, text: t, ts: Date.now() };
+    update((s) => appendMessage(s.chatSessions.some((session) => session.id === sessionId) ? s : { ...s, activeSessionId: sessionId, chatSessions: [blankSession(sessionId, message.ts), ...s.chatSessions] }, sessionId, message));
+    setText(""); respond(t, sessionId);
   };
   const newChat = () => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = null; busy.current = false; setTyping(false); setText("");
-    update((s) => ({ ...s, chat: [] }));
+    setText(""); setHistoryOpen(false);
+    const id = `session-${Date.now()}-${++sequence.current}`;
+    update((s) => startSession(s, id, Date.now()));
     composer.current?.focus({ preventScroll: true });
   };
   const retry = (id: string) => {
-    if (busy.current) return;
+    if (!activeId || timers.current.has(activeId)) return;
     const idx = msgs.findIndex((m) => m.id === id);
     const prev = [...msgs.slice(0, idx)].reverse().find((m) => m.role === "user");
     if (!prev) return;
-    update((s) => ({ ...s, chat: s.chat.filter((m) => m.id !== id) }));
-    respond(prev.text);
+    update((s) => ({ ...s, chatSessions: s.chatSessions.map((session) => session.id === activeId ? { ...session, messages: session.messages.filter((m) => m.id !== id) } : session) }));
+    respond(prev.text, activeId);
   };
   return <div className="orbit-chat-area chat-workspace">
     <header className="chat-topbar">
+      <Button variant="ghost" className="chat-icon chat-history-toggle" aria-label={!desktop || state.chatSidebarCollapsed ? "Open conversations" : "Toggle conversations"} title="Conversations" aria-expanded={desktop ? !state.chatSidebarCollapsed : historyOpen} aria-controls={desktop ? "chat-sessions" : "chat-sessions-mobile"} onClick={() => { if (desktop) update((s) => ({ ...s, chatSidebarCollapsed: !s.chatSidebarCollapsed })); else setHistoryOpen(true); }}>{!desktop || state.chatSidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}</Button>
       <div className="chat-title-group"><span className="chat-logo"><Orbit /></span><div><h1>Orbit Intelligence</h1><div className="chat-demo-label"><span className="chat-status-dot" />Demo assistant · on this device</div></div></div>
-      <div className="chat-toolbar"><Link to="/connections" className="chat-offline"><Laptop />Laptop Agent · offline</Link><Button className="chat-new" onClick={newChat} aria-label="New chat — clear conversation" title="New chat — clears this conversation"><Plus /><span className="chat-new-text">New chat</span></Button></div>
+      <div className="chat-toolbar"><Link to="/connections" className="chat-offline"><Laptop />Laptop Agent · offline</Link><Button className="chat-new" onClick={newChat} aria-label="New chat" title="New chat"><Plus /><span className="chat-new-text">New chat</span></Button></div>
     </header>
-    <div className="chat-columns">
-      <aside className="chat-history" aria-label="Current conversation history">
-        <div className="chat-history-label">IN THIS CONVERSATION</div>
-        {history.length ? history.map((message) => <Button key={message.id} variant="ghost" className="chat-history-item" onClick={() => document.getElementById(`message-${message.id}`)?.scrollIntoView({ behavior: "auto", block: "center" })}><MessageSquare />{message.text.length > 65 ? `${message.text.slice(0, 65)}…` : message.text}</Button>) : <p className="chat-history-empty">Your conversation will appear here.</p>}
-        <div className="chat-history-label">QUICK SHORTCUTS</div>
-        {SUGGESTIONS.slice(0, 3).map((item) => <Button variant="ghost" className="chat-history-item" key={item.title} disabled={typing} onClick={() => send(item.prompt)}><item.icon />{item.subtitle}</Button>)}
-        <div className="chat-history-footer"><ShieldCheck className="size-4 mb-2" />One conversation, saved on this device. New chat clears it. No AI service or external tool is connected.</div>
+    <div className="chat-columns" data-history-collapsed={state.chatSidebarCollapsed}>
+      <aside id="chat-sessions" className="chat-history" aria-label="Conversation sessions">
+        {state.chatSidebarCollapsed ? <Button variant="ghost" className="chat-icon" aria-label="Expand conversations sidebar" title="Expand conversations" onClick={() => update((s) => ({ ...s, chatSidebarCollapsed: false }))}><PanelLeftOpen /></Button> : <SessionHistory onSelect={() => setText("")} onNew={newChat} />}
       </aside>
       <section className="chat-conversation" aria-label="Chat conversation">
         <div className="chat-messages" role="log" aria-live="polite" aria-relevant="additions">
@@ -111,6 +125,7 @@ function Chat() {
         </div>
       </section>
     </div>
+    <Dialog.Root open={historyOpen} onOpenChange={setHistoryOpen}><Dialog.Portal><Dialog.Overlay className="chat-session-overlay" /><Dialog.Content id="chat-sessions-mobile" className="orbit-chat-area chat-history-drawer"><Dialog.Title className="sr-only">Conversation sessions</Dialog.Title><Dialog.Description className="sr-only">Open or manage a saved conversation</Dialog.Description><Button variant="ghost" className="chat-icon chat-drawer-close" aria-label="Close conversations" onClick={() => setHistoryOpen(false)}><X /></Button><SessionHistory onSelect={() => { setText(""); setHistoryOpen(false); }} onNew={newChat} /></Dialog.Content></Dialog.Portal></Dialog.Root>
     <VoiceMode open={voiceOpen} onClose={closeVoice} onSend={send} />
   </div>;
 }

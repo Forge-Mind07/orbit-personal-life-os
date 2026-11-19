@@ -1,4 +1,7 @@
 # ORBIT redesign
+- [x] Implement conversation sessions with lossless migration, rename/delete and isolated pending replies.
+- [x] Add independent persisted global rail and Chat session drawer/rail controls.
+- [x] Apply scoped liquid glass styling and verify sessions, voice, layouts and other modules.
 - [x] Redesign Chat only with scoped midnight styling, real single-conversation history, and rich demo replies.
 - [x] Add accessible simulated voice mode; verify sending, editing, cancelling, persistence, navigation and mobile/desktop layouts.
 - [x] Restyle Feed and reader with scoped editorial visuals and functional carousels, search and personalized demo briefing.

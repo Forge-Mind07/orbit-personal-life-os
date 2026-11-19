@@ -3,6 +3,7 @@ import { toISO, type ISODate } from "./dates";
 import { seedExpenses, type Category, type Expense } from "./finance";
 import type { Topic } from "./feed";
 import type { ChatMessage } from "./chat";
+import { migrateSessions, type ChatSession } from "./sessions";
 
 export type ReflectionReason = "Busy" | "Unwell" | "Rest/recovery" | "Weather" | "Travel" | "Forgot" | "Other";
 export const REFLECTION_REASONS: ReflectionReason[] = ["Busy", "Unwell", "Rest/recovery", "Weather", "Travel", "Forgot", "Other"];
@@ -27,6 +28,10 @@ export interface OrbitState {
   bookmarks: string[];
   expenses: Expense[];
   chat: ChatMessage[];
+  chatSessions: ChatSession[];
+  activeSessionId: string | null;
+  mainSidebarCollapsed: boolean;
+  chatSidebarCollapsed: boolean;
   laptop: { mode: "lan" | "tailscale" | "custom"; endpoint: string };
   readNotifications: string[];
   paceOutfit?: "apricot" | "lagoon" | "berry" | "sunshine";
@@ -45,6 +50,10 @@ export const DEFAULT_STATE: OrbitState = {
   bookmarks: [],
   expenses: [],
   chat: [],
+  chatSessions: [],
+  activeSessionId: null,
+  mainSidebarCollapsed: false,
+  chatSidebarCollapsed: false,
   laptop: { mode: "lan", endpoint: "http://192.168.1.20:8787" },
   readNotifications: [],
 };
@@ -73,7 +82,12 @@ export function OrbitProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) setState({ ...DEFAULT_STATE, ...(JSON.parse(raw) as Partial<OrbitState>) });
+      if (raw) {
+        const stored = JSON.parse(raw) as Partial<OrbitState>;
+        const migrated = { ...DEFAULT_STATE, ...stored, ...migrateSessions(stored) };
+        localStorage.setItem(KEY, JSON.stringify(migrated));
+        setState(migrated);
+      }
     } catch {
       /* corrupt storage: fall back to defaults */
     }

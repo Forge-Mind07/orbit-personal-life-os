@@ -7,6 +7,7 @@ import { useOrbit } from "@/lib/orbit/store";
 import { SidebarContent } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { BottomNav } from "./BottomNav";
+import "./shell.css";
 
 function Splash() {
   return (
@@ -22,15 +23,15 @@ function Splash() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { ready } = useOrbit();
+  const { ready, state, update } = useOrbit();
   const [open, setOpen] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   const reduce = useReducedMotion();
   if (!ready) return <Splash />;
   return (
-    <div className="orbit-shell min-h-dvh bg-background">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r bg-sidebar lg:block">
-        <SidebarContent />
+    <div className="orbit-shell min-h-dvh bg-background" data-main-collapsed={state.mainSidebarCollapsed}>
+      <aside id="orbit-main-sidebar" className="orbit-main-sidebar fixed inset-y-0 left-0 z-30 hidden border-r bg-sidebar lg:block">
+        <SidebarContent collapsed={state.mainSidebarCollapsed} onToggle={() => update((s) => ({ ...s, mainSidebarCollapsed: !s.mainSidebarCollapsed }))} />
       </aside>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-[86vw] max-w-80 border-r bg-sidebar p-0">
@@ -39,7 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SidebarContent onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
-      <div className="lg:pl-60">
+      <div className="orbit-shell-content">
         <TopBar onMenu={() => setOpen(true)} />
 
           <motion.main
