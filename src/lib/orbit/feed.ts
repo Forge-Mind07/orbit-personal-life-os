@@ -250,3 +250,18 @@ export function briefingFor(prefs: Topic[]) {
   }
   return out;
 }
+
+/** Search is local and uses only the fictional article text. */
+export function searchArticles(articles: Article[], query: string, city: string) {
+  const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  return articles.filter((a) => words.every((word) => cityize(`${a.title} ${a.dek}`, city).toLocaleLowerCase().includes(word)));
+}
+
+/** Recompose grounded takeaways without inventing reporting or calling a model. */
+export function demoBriefing(scope: Scope, prefs: Topic[], revision = 0) {
+  const pool = filterArticles(scope, "For You", prefs, []);
+  return pool.slice(0, 5).map((article) => ({
+    article,
+    takeaway: article.keyPoints[revision % article.keyPoints.length] ?? article.dek,
+  }));
+}

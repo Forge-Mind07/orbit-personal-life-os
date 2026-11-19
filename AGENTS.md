@@ -35,5 +35,6 @@ use the editor.
 - Demo data is deterministic (hash of ISO date), never `Math.random()` — values stay stable across renders and reloads.
 
 - Shared visual tokens and panel geometry live in `src/styles.css`; Health overrides tokens only inside `.health-area` (including its portal sheets), so its light identity cannot restyle the shell or other modules. Health owns its motion; `Page` owns other modules' viewport reveals.
-- Editorial thumbnails use original deterministic vector signal artwork rather than external media, keeping the demo offline and avoiding copied reference assets.
+- Shared editorial thumbnails use deterministic vector signal artwork; Feed uses its own original topic-based vector scenes, keeping all demo media offline and avoiding copied assets.
+- Feed and reader override tokens only inside `.orbit-feed`; Feed owns its scoped layout and motion so the editorial identity never restyles other modules or navigation.
 - Pace uses one reusable layered SVG and event-driven animation controller; contextual mood stays pure in the domain layer and wardrobe preferences stay in the existing ORBIT store, so previews never mutate activity totals.

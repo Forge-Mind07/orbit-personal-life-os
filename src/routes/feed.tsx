@@ -1,104 +1,54 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Bookmark, Newspaper } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bookmark, Search, X } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { Button } from "@/components/ui/button";
 import { BookmarkButton } from "@/components/orbit/feed/BookmarkButton";
+import { DailyBriefing } from "@/components/orbit/feed/DailyBriefing";
+import { EditorialArt } from "@/components/orbit/feed/EditorialArt";
+import { StoryCarousel } from "@/components/orbit/feed/StoryCarousel";
 import { useOrbit } from "@/lib/orbit/store";
-import { ARTICLES, TOPICS, briefingFor, cityize, filterArticles, type Article, type Scope, type Topic } from "@/lib/orbit/feed";
-import { Chip, Page, SectionHeader } from "@/components/orbit/common/bits";
-import { SegmentTabs } from "@/components/orbit/common/SegmentTabs";
-import { ArticleThumb } from "@/components/orbit/common/ArticleThumb";
+import { TOPICS, cityize, filterArticles, searchArticles, type Scope, type Topic } from "@/lib/orbit/feed";
+import "@/components/orbit/feed/feed.css";
 
 export const Route = createFileRoute("/feed")({
-  head: () => ({
-    meta: [
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:type", content: "website" },
-      { title: "Feed · ORBIT" },
-      { name: "description", content: "A calm, editorial reading feed by city, nation and world. Illustrative demo articles." },
-      { property: "og:title", content: "Feed · ORBIT" },
-      { property: "og:description", content: "A calm, editorial reading feed by city, nation and world." },
-    ],
-  }),
-  component: Feed,
+  head: () => ({ meta: [
+    { title: "Your reading world · ORBIT Feed" },
+    { name: "description", content: "Your personal editorial feed with source-grounded demo briefings, saved stories and illustrative articles." },
+    { property: "og:title", content: "Your reading world · ORBIT Feed" },
+    { property: "og:description", content: "Explore fictional city, national and world stories and a personalized demo briefing." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  ] }), component: Feed,
 });
-
-const SCOPES = ["City", "National", "International"] as const;
+const SCOPES: Scope[] = ["City", "National", "International"];
 type TopicFilter = Topic | "For You" | "Saved";
-
-function Row({ a, city, i }: { a: Article; city: string; i: number }) {
-  return (
-    <Link to="/article/$id" params={{ id: a.id }} className="flex gap-4 py-4">
-      <ArticleThumb hues={a.hues} seed={i} className="size-20 shrink-0 rounded-2xl" />
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-feed">{a.topic} · Illustrative demo article</p>
-        <p className="mt-1 line-clamp-2 font-semibold leading-snug">{cityize(a.title, city)}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{a.readMin} min · Orbit Demo Desk</p>
-      </div>
-      <BookmarkButton id={a.id} />
-    </Link>
-  );
-}
-
 function Feed() {
   const { state } = useOrbit();
   const [scope, setScope] = useState<Scope>("City");
   const [topic, setTopic] = useState<TopicFilter>("For You");
-  const list = filterArticles(scope, topic, state.topics, state.bookmarks);
-  const brief = briefingFor(state.topics);
-  const [lead, ...rest] = list;
-
-  return (
-    <Page className="space-y-6 pt-6">
-      <section className="card-orbit relative overflow-hidden p-6">
-        <p className="relative flex items-center gap-2 text-sm font-semibold text-feed"><Newspaper className="size-4" /> Daily briefing</p>
-        <p className="relative mt-2 font-display text-2xl font-bold tracking-tight">Three things worth your attention</p>
-        <ol className="relative mt-4 space-y-3">
-          {brief.map((a, i) => (
-            <li key={a.id}>
-              <Link to="/article/$id" params={{ id: a.id }} className="flex gap-3 text-sm">
-                <span className="font-display font-bold text-feed tnum">0{i + 1}</span>
-                <span><span className="font-semibold">{cityize(a.title, state.city)}</span> <span className="text-muted-foreground">· {a.scope}</span></span>
-              </Link>
-            </li>
-          ))}
-        </ol>
-        <p className="relative mt-4 text-xs text-muted-foreground">Illustrative demo content generated for this prototype, not real current news.</p>
-      </section>
-
-      <SegmentTabs id="scope" label="News scope" options={SCOPES} value={scope} onChange={(s) => { setScope(s); if (topic === "Saved") setTopic("For You"); }} />
-      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="group" aria-label="Topics">
-        {(["For You", ...TOPICS, "Saved"] as TopicFilter[]).map((t) => (
-          <Chip key={t} active={topic === t} onClick={() => setTopic(t)}>{t}{t === "Saved" && state.bookmarks.length > 0 ? ` · ${state.bookmarks.length}` : ""}</Chip>
-        ))}
+  const [search, setSearch] = useState("");
+  const [greeting, setGreeting] = useState("Good morning");
+  const reduce = useReducedMotion();
+  useEffect(() => { const h = new Date().getHours(); setGreeting(h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"); }, []);
+  const list = searchArticles(filterArticles(scope, topic, state.topics, state.bookmarks), search, state.city);
+  return <div className="orbit-feed"><div className="feed-page">
+    <DailyBriefing scope={scope}/>
+    <div className="feed-search"><Search/><input type="search" aria-label="Search stories" placeholder="Search your reading world" value={search} onChange={(e) => setSearch(e.target.value)}/>{search && <Button variant="ghost" className="feed-icon-button" aria-label="Clear search" onClick={() => setSearch("")}><X/></Button>}</div>
+    <header className="feed-greeting"><h2>{greeting}, {state.name}.</h2><p>A fresh perspective, one story at a time.</p></header>
+    <div className="feed-filters">
+      <div className="feed-pills" role="group" aria-label="News scope">{SCOPES.map((s) => <Button variant="ghost" className="feed-pill" key={s} aria-pressed={scope === s} onClick={() => {setScope(s); if (topic === "Saved") setTopic("For You");}}>{s === "City" ? state.city : s}</Button>)}</div>
+      <div className="feed-pills" role="group" aria-label="Topics">{(["For You", ...TOPICS, "Saved"] as TopicFilter[]).map((t) => <Button variant="ghost" key={t} className="feed-pill" aria-pressed={topic === t} onClick={() => setTopic(t)}>{t === "Saved" && <Bookmark size={12}/>} {t}{t === "Saved" && state.bookmarks.length > 0 ? ` · ${state.bookmarks.length}` : ""}</Button>)}</div>
+    </div>
+    {list.length ? <div className="feed-layout">
+      <div><div className="feed-section-title"><h2>In the spotlight</h2><span>{topic === "Saved" ? "Your collection" : scope === "City" ? state.city : scope}</span></div><StoryCarousel articles={list.slice(0,5)} city={state.city}/>
+        <div className="feed-section-title"><div><h2>Walk with Trend</h2><p>Ideas worth a closer look.</p></div></div><StoryCarousel portrait articles={list.slice(0,6)} city={state.city}/>
       </div>
-
-      {!lead ? (
-        <div className="card-orbit flex flex-col items-center p-10 text-center">
-          <Bookmark className="size-8 text-muted-foreground" />
-          <p className="mt-3 font-semibold">{topic === "Saved" ? "Nothing saved yet" : "No stories here"}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{topic === "Saved" ? "Tap the bookmark on any article to keep it here." : "Try another topic or scope."}</p>
-        </div>
-      ) : (
-        <section>
-          <SectionHeader title={topic === "Saved" ? "Saved" : scope === "City" ? state.city : scope} eyebrow={`${list.length} stories`} />
-          <Link to="/article/$id" params={{ id: lead.id }} className="card-orbit block overflow-hidden">
-            <ArticleThumb hues={lead.hues} className="h-44 sm:h-56" />
-            <div className="p-5">
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-feed">{lead.topic} · Illustrative demo article</p>
-                  <h3 className="mt-2 font-display text-xl font-bold leading-snug tracking-tight">{cityize(lead.title, state.city)}</h3>
-                </div>
-                <BookmarkButton id={lead.id} />
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">{cityize(lead.dek, state.city)}</p>
-              <p className="mt-3 text-xs text-muted-foreground">{lead.readMin} min read · Orbit Demo Desk</p>
-            </div>
-          </Link>
-          {rest.length > 0 && <div className="card-orbit mt-3 divide-y px-5">{rest.map((a, i) => <Row key={a.id} a={a} city={state.city} i={i + 1} />)}</div>}
-        </section>
-      )}
-      <p className="sr-only">{ARTICLES.length} demo articles available</p>
-    </Page>
-  );
+      <div><div className="feed-section-title"><h2>{topic === "Saved" ? "Saved for a quiet moment" : "Top reads of the day"}</h2><span>{list.length} stories</span></div>
+        <div className="feed-rows">{list.map((a,i) => <motion.div className="feed-row" key={a.id} initial={reduce ? false : {opacity:0,y:10}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:reduce ? 0 : .24,delay:reduce ? 0 : Math.min(i,4)*.035}}>
+          <Link to="/article/$id" params={{id:a.id}} className="feed-row-link"><EditorialArt topic={a.topic}/><div className="feed-row-text"><p className="feed-row-label">{a.topic} · Illustrative demo article</p><h3>{cityize(a.title,state.city)}</h3><p>{a.readMin} min read · {a.hoursAgo}h ago in demo</p></div></Link><BookmarkButton id={a.id}/>
+        </motion.div>)}</div>
+      </div>
+    </div> : <div className="feed-empty"><Bookmark/><p>{topic === "Saved" ? "No saved stories here yet" : "No stories match this view"}</p><p>{search ? "Try a different search or clear your filters." : "Choose another topic, or save a story for later."}</p></div>}
+    <p className="feed-footnote">Fictional stories, original illustrative artwork. ORBIT Demo Desk · not live news.</p>
+  </div></div>;
 }

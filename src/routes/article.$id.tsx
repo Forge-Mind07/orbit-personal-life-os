@@ -1,62 +1,43 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Info } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Info, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { getArticle, cityize } from "@/lib/orbit/feed";
 import { useOrbit } from "@/lib/orbit/store";
-import { ArticleThumb } from "@/components/orbit/common/ArticleThumb";
-import { Page } from "@/components/orbit/common/bits";
+import { EditorialArt } from "@/components/orbit/feed/EditorialArt";
 import { BookmarkButton } from "@/components/orbit/feed/BookmarkButton";
+import { Button } from "@/components/ui/button";
+import "@/components/orbit/feed/feed.css";
 
 export const Route = createFileRoute("/article/$id")({
-  loader: ({ params }) => {
-    const a = getArticle(params.id);
-    if (!a) throw notFound();
-    return { title: a.title.split("{city}").join("Chennai"), dek: a.dek };
-  },
-  head: ({ loaderData }) => ({
-    meta: [
-      { name: "twitter:card", content: "summary_large_image" },
-      { title: loaderData ? `${loaderData.title} · ORBIT Reader` : "Article unavailable · ORBIT" },
-      { name: "description", content: loaderData?.dek ?? "Illustrative demo article" },
-      { property: "og:title", content: loaderData?.title ?? "ORBIT Reader" },
-      { property: "og:description", content: loaderData?.dek ?? "Illustrative demo article" },
-      { property: "og:type", content: "article" },
-    ],
-  }),
-  notFoundComponent: () => (
-    <Page className="pt-10 text-center"><p className="font-semibold">Article not found</p><Link to="/feed" className="mt-3 inline-block text-primary">Back to Feed</Link></Page>
-  ),
-  component: Reader,
+  loader: ({params}) => { const a = getArticle(params.id); if (!a) throw notFound(); return {title:cityize(a.title,"Chennai"),dek:a.dek}; },
+  head: ({loaderData}) => ({meta: [
+    {title:loaderData ? `${loaderData.title} · ORBIT Reader` : "Article unavailable · ORBIT"},
+    {name:"description",content:loaderData?.dek ?? "Illustrative demo article"},
+    {property:"og:title",content:loaderData?.title ?? "ORBIT Reader"},
+    {property:"og:description",content:loaderData?.dek ?? "Illustrative demo article"},
+    {property:"og:type",content:"article"},{name:"twitter:card",content:"summary_large_image"},
+  ]}),
+  notFoundComponent: () => <div className="orbit-feed feed-empty"><p>Article not found</p><Link to="/feed" className="feed-reader-return">Back to Feed</Link></div>, component:Reader,
 });
-
 function Reader() {
-  const { id } = Route.useParams();
-  const { state } = useOrbit();
-  const a = getArticle(id)!;
-  const c = (s: string) => cityize(s, state.city);
-  return (
-    <Page className="max-w-2xl pt-4">
-      <ArticleThumb hues={a.hues} className="h-52 rounded-[28px] sm:h-72" />
-      <div className="mt-5 flex items-center gap-2">
-        <span className="rounded-full border border-feed/40 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-feed">Illustrative demo article</span>
-        <span className="text-xs text-muted-foreground">{a.scope} · {a.topic}</span>
-        <div className="ml-auto"><BookmarkButton id={a.id} /></div>
+  const {id} = Route.useParams(); const {state} = useOrbit(); const a = getArticle(id);
+  if (!a) return null;
+  const c = (text:string) => cityize(text,state.city);
+  const share = async () => {
+    const data = {title:c(a.title),text:`Illustrative ORBIT demo article: ${c(a.dek)}`,url:window.location.href};
+    try { if (navigator.share) {await navigator.share(data);return;} } catch (error) {if (error instanceof Error && error.name === "AbortError") return;}
+    try {await navigator.clipboard.writeText(data.url);toast("Article link copied");} catch {toast("Sharing unavailable — copy the address from your browser");}
+  };
+  return <div className="orbit-feed feed-reader"><div className="feed-reader-column">
+    <header className="feed-reader-hero"><EditorialArt topic={a.topic}/><div className="feed-media-shade"/><Link to="/feed" className="feed-reader-back" aria-label="Back to Feed"><ArrowLeft size={20}/></Link>
+      <div className="feed-reader-caption"><div className="feed-reader-tags"><span>{a.topic}</span><span>{a.scope === "City" ? state.city : a.scope}</span><span>Illustrative demo article</span></div><h1>{c(a.title)}</h1><p>{c(a.dek)}</p>
+        <div className="feed-reader-source"><span className="feed-source-avatar" aria-hidden="true">O</span><div className="feed-source-text">ORBIT Demo Desk<small>{a.readMin} min read · fictional example</small></div><BookmarkButton id={a.id}/><Button variant="ghost" className="feed-icon-button" aria-label="Share article" onClick={share}><Share2/></Button></div>
       </div>
-      <h2 className="mt-3 font-display text-3xl font-bold leading-tight tracking-tight">{c(a.title)}</h2>
-      <p className="mt-3 text-lg text-muted-foreground">{c(a.dek)}</p>
-      <p className="mt-4 text-sm text-muted-foreground">By <span className="font-semibold text-foreground">Orbit Demo Desk</span> · {a.readMin} min read</p>
-      <aside className="card-orbit mt-6 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Summary</p>
-        <ul className="mt-3 space-y-2">
-          {a.keyPoints.map((k) => <li key={k} className="flex gap-3 text-sm"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-feed" />{k}</li>)}
-        </ul>
-      </aside>
-      <article className="mt-6 space-y-5 text-[17px] leading-8">
-        {a.body.map((p, i) => <p key={i}>{c(p)}</p>)}
-      </article>
-      <div className="mt-8 flex gap-3 rounded-2xl bg-surface-2/60 p-4 text-sm text-muted-foreground">
-        <Info className="size-5 shrink-0" />
-        <p>Source attribution: Orbit Demo Desk (synthetic). This article was written for the prototype and does not report real events. No external link is provided.</p>
-      </div>
-    </Page>
-  );
+    </header>
+    <div className="feed-reader-body"><aside className="feed-reader-summary"><h2>The short version</h2><ul>{a.keyPoints.map((point) => <li key={point}>{c(point)}</li>)}</ul></aside>
+      <article>{a.body.map((p,i) => <p key={i}>{c(p)}</p>)}</article>
+      <div className="feed-source-note"><Info/><p>Source: ORBIT Demo Desk (synthetic). This article and its artwork are original illustrations for the prototype, not reporting of real events. No external source is claimed.</p></div>
+      <Link to="/feed" className="feed-reader-return">Back to your reading world <ArrowUpRight size={16}/></Link>
+    </div>
+  </div></div>;
 }

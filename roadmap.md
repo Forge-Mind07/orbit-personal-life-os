@@ -1,4 +1,6 @@
-# ORBIT Health redesign
+# ORBIT redesign
+- [x] Restyle Feed and reader with scoped editorial visuals and functional carousels, search and personalized demo briefing.
+- [x] Verify Feed filters, bookmarks, briefing actions, reader sharing and mobile/desktop layouts.
 - [x] Create expressive original Pace artwork and contextual interactions in Health and the activity preview.
 - [x] Add saved outfits and verify goal states, keyboard access, reduced motion and mobile/desktop layouts.
 - [x] Redesign Health alone with ice-blue styling, date selection, animated tracker and bento details.
