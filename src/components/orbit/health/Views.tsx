@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChevronLeft, ChevronRight, Flame, Trophy } from "lucide-react";
@@ -15,14 +17,15 @@ const kfmt = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 ? 1 : 0)
 function Pager({ label, onPrev, onNext, canNext }: { label: string; onPrev: () => void; onNext: () => void; canNext: boolean }) {
   return (
     <div className="mb-4 flex items-center justify-between">
-      <button onClick={onPrev} className="grid size-10 place-items-center rounded-full bg-surface-2" aria-label="Previous"><ChevronLeft className="size-4" /></button>
+      <Button variant="ghost" onClick={onPrev} className="grid size-10 place-items-center rounded-full bg-surface-2" aria-label="Previous"><ChevronLeft className="size-4" /></Button>
       <p className="text-sm font-semibold" aria-live="polite">{label}</p>
-      <button onClick={onNext} disabled={!canNext} className="grid size-10 place-items-center rounded-full bg-surface-2 disabled:opacity-30" aria-label="Next"><ChevronRight className="size-4" /></button>
+      <Button variant="ghost" onClick={onNext} disabled={!canNext} className="grid size-10 place-items-center rounded-full bg-surface-2 disabled:opacity-30" aria-label="Next"><ChevronRight className="size-4" /></Button>
     </div>
   );
 }
 
 export function DayView() {
+  const reduce = useReducedMotion();
   const data = TODAY_SAMPLE.hourly.map((v, h) => ({ h, label: h === 0 ? "12a" : h < 12 ? `${h}a` : h === 12 ? "12p" : `${h - 12}p`, v })).slice(5, 22);
   const peak = data.reduce((a, b) => (b.v > a.v ? b : a));
   const kindColor = { brisk: "var(--health)", jog: "var(--primary)", everyday: "var(--feed)" } as const;
@@ -39,7 +42,7 @@ export function DayView() {
               <XAxis dataKey="label" tick={axis} axisLine={false} tickLine={false} interval={2} />
               <YAxis tick={axis} axisLine={false} tickLine={false} tickFormatter={kfmt} width={44} />
               <Tooltip cursor={{ fill: "var(--track)" }} content={<ChartTooltip format={(v) => `${formatNum(v)} steps`} />} />
-              <Bar dataKey="v" radius={[6, 6, 6, 6]} maxBarSize={14}>
+              <Bar isAnimationActive={!reduce} dataKey="v" radius={[6, 6, 6, 6]} maxBarSize={14}>
                 {data.map((d) => <Cell key={d.h} fill={d.v === peak.v ? "var(--health)" : "color-mix(in oklab, var(--health) 45%, transparent)"} />)}
               </Bar>
             </BarChart>
@@ -70,12 +73,13 @@ export function DayView() {
 
 export function WeekView({ onSelect }: { onSelect: (d: ISODate) => void }) {
   const { state, today } = useOrbit();
+  const reduce = useReducedMotion();
   const goal = state.stepGoal;
   const [offset, setOffset] = useState(0);
   const anchor = addDays(today, offset * 7);
   const s = useMemo(() => summarize(weekDates(anchor), goal, today), [anchor, goal, today]);
   const data = s.days.map((d) => ({ date: d.date, label: fmt(d.date, "EEE"), v: d.steps ?? 0, status: dayStatus(d, goal, today) }));
-  const range = `${fmt(s.days[0]!.date, "d MMM")} – ${fmt(s.days[6]!.date, "d MMM")}`;
+  const range = `${fmt((s.days[0]?.date ?? anchor), "d MMM")} – ${fmt((s.days[6]?.date ?? anchor), "d MMM")}`;
   return (
     <div className="space-y-5">
       <div className="card-orbit p-5">
@@ -87,7 +91,7 @@ export function WeekView({ onSelect }: { onSelect: (d: ISODate) => void }) {
               <YAxis tick={axis} axisLine={false} tickLine={false} tickFormatter={kfmt} width={44} domain={[0, (max: number) => Math.max(max, goal) * 1.1]} />
               <Tooltip cursor={{ fill: "var(--track)", radius: 10 }} content={<ChartTooltip format={(v) => `${formatNum(v)} steps`} />} />
               <ReferenceLine y={goal} stroke="var(--muted-foreground)" strokeDasharray="4 4" label={{ value: "Goal", position: "insideTopRight", fill: "var(--muted-foreground)", fontSize: 11 }} />
-              <Bar dataKey="v" radius={[10, 10, 10, 10]} maxBarSize={34} onClick={(d: { date?: string }) => d.date && onSelect(d.date)} className="cursor-pointer">
+              <Bar isAnimationActive={!reduce} dataKey="v" radius={[10, 10, 10, 10]} maxBarSize={34} onClick={(d: { date?: string }) => d.date && onSelect(d.date)} className="cursor-pointer">
                 {data.map((d) => <Cell key={d.date} fill={d.status === "future" || d.status === "nodata" ? "var(--track)" : STATUS_COLOR[d.status]} />)}
               </Bar>
             </BarChart>
@@ -95,10 +99,10 @@ export function WeekView({ onSelect }: { onSelect: (d: ISODate) => void }) {
         </div>
         <div className="mt-3 grid grid-cols-7 gap-1">
           {data.map((d) => (
-            <button key={d.date} onClick={() => onSelect(d.date)} className="flex min-h-11 flex-col items-center justify-center rounded-xl text-[11px] text-muted-foreground hover:bg-surface-2" aria-label={`${fmt(d.date, "EEEE d MMM")}: ${STATUS_LABEL[d.status]}`}>
+            <Button variant="ghost" key={d.date} onClick={() => onSelect(d.date)} className="flex min-h-11 flex-col items-center justify-center rounded-xl text-[11px] text-muted-foreground hover:bg-surface-2" aria-label={`${fmt(d.date, "EEEE d MMM")}: ${STATUS_LABEL[d.status]}`}>
               <span className="size-2 rounded-full" style={{ background: STATUS_COLOR[d.status] }} />
               <span className="mt-1">{fmt(d.date, "d")}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -114,11 +118,12 @@ export function WeekView({ onSelect }: { onSelect: (d: ISODate) => void }) {
 
 export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
   const { state, today } = useOrbit();
+  const reduce = useReducedMotion();
   const goal = state.stepGoal;
   const [offset, setOffset] = useState(0);
   const anchor = addMonths(today, offset);
   const s = useMemo(() => summarize(monthDates(anchor), goal, today), [anchor, goal, today]);
-  const lead = weekdayIndex(s.days[0]!.date);
+  const lead = weekdayIndex((s.days[0]?.date ?? anchor));
   return (
     <div className="space-y-5">
       <div className="card-orbit p-5">
@@ -133,7 +138,7 @@ export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
             const refl = state.reflections[d.date];
             const progress = st === "today" ? Math.min(1, (d.steps ?? 0) / goal) : 0;
             return (
-              <button
+              <Button variant="ghost"
                 key={d.date}
                 onClick={() => onSelect(d.date)}
                 aria-label={`${fmt(d.date, "d MMMM")}: ${STATUS_LABEL[st]}${d.steps !== null ? `, ${d.steps} steps` : ""}${refl ? `, reflection ${refl.reason}` : ""}`}
@@ -150,7 +155,7 @@ export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
                 {st === "today" && <span className="absolute inset-x-0 bottom-0 bg-primary/35" style={{ height: `${progress * 100}%` }} />}
                 <span className="relative">{fmt(d.date, "d")}</span>
                 {refl && <span className="absolute right-1 top-1 size-1.5 rounded-full bg-foreground" />}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -173,6 +178,7 @@ export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
 
 export function YearView() {
   const { state, today } = useOrbit();
+  const reduce = useReducedMotion();
   const data = useMemo(() => yearByMonth(state.stepGoal, today), [state.stepGoal, today]);
   const st = useMemo(() => streaks(state.stepGoal, today), [state.stepGoal, today]);
   const completed = data.reduce((t, m) => t + m.completed, 0);
@@ -192,7 +198,7 @@ export function YearView() {
               <XAxis dataKey="label" tick={axis} axisLine={false} tickLine={false} interval={1} />
               <YAxis tick={axis} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={40} domain={[0, 100]} />
               <Tooltip cursor={{ fill: "var(--track)", radius: 8 }} content={<ChartTooltip format={(v) => `${v}% of eligible days`} />} />
-              <Bar dataKey="completionRate" radius={[8, 8, 8, 8]} maxBarSize={20}>
+              <Bar isAnimationActive={!reduce} dataKey="completionRate" radius={[8, 8, 8, 8]} maxBarSize={20}>
                 {data.map((d, i) => <Cell key={d.month} fill={i === data.length - 1 ? "var(--primary)" : "var(--health)"} />)}
               </Bar>
             </BarChart>

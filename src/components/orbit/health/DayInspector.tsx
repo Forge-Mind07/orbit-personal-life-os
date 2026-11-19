@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { NotebookPen } from "lucide-react";
 import { toast } from "sonner";
-import { BottomSheet } from "../common/BottomSheet";
+import { HealthSheet as BottomSheet } from "./HealthSheet";
+import { Button } from "@/components/ui/button";
 import { GhostButton, PrimaryButton, Stat } from "../common/bits";
 import { canReflect, dayStatus, seedDay } from "@/lib/orbit/activity";
 import { fmt, type ISODate } from "@/lib/orbit/dates";
@@ -60,7 +61,7 @@ export function DayInspector({ date, onClose }: { date: ISODate | null; onClose:
           <legend className="mb-3 text-sm font-semibold">What got in the way?</legend>
           <div className="flex flex-wrap gap-2">
             {REFLECTION_REASONS.map((r) => (
-              <button
+              <Button variant="ghost"
                 key={r}
                 type="button"
                 aria-pressed={reason === r}
@@ -68,7 +69,7 @@ export function DayInspector({ date, onClose }: { date: ISODate | null; onClose:
                 className={cn("min-h-11 rounded-2xl border px-4 text-sm font-semibold transition-all", reason === r ? "border-transparent bg-health text-on-accent" : "bg-surface-2/60 text-muted-foreground hover:text-foreground")}
               >
                 {r}
-              </button>
+              </Button>
             ))}
           </div>
         </fieldset>
@@ -136,12 +137,12 @@ export function DayInspector({ date, onClose }: { date: ISODate | null; onClose:
           {reflection ? (
             <>
               <p className="mt-2 text-sm"><span className="font-semibold">{reflection.reason}</span>{reflection.note && <span className="text-muted-foreground"> · {reflection.note}</span>}</p>
-              <button className="mt-3 min-h-10 text-sm font-semibold text-primary" onClick={() => setMode("reflect")}>Edit reflection</button>
+              <Button variant="ghost" className="mt-3 min-h-10 text-sm font-semibold text-primary" onClick={() => setMode("reflect")}>Edit reflection</Button>
             </>
           ) : (
             <>
               <p className="mt-2 text-sm text-muted-foreground">No reflection yet. Adding context helps Orbit spot patterns kindly.</p>
-              <button className="mt-3 min-h-10 text-sm font-semibold text-primary" onClick={() => setMode("reflect")}>Add reflection</button>
+              <Button variant="ghost" className="mt-3 min-h-10 text-sm font-semibold text-primary" onClick={() => setMode("reflect")}>Add reflection</Button>
             </>
           )}
         </div>
