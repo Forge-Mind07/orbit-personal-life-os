@@ -8,6 +8,8 @@ import { InvestmentsTab } from "@/components/orbit/finance/InvestmentsTab";
 export const Route = createFileRoute("/finance")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Finance · ORBIT" },
       { name: "description", content: "Monthly budget, spending categories and a demo investment portfolio in rupees." },
       { property: "og:title", content: "Finance · ORBIT" },

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Footprints, MapPin, Pencil, Timer, Activity, Wind, Zap, PersonStanding } from "lucide-react";
@@ -17,6 +18,8 @@ import { GoalSheet } from "@/components/orbit/health/GoalSheet";
 export const Route = createFileRoute("/health")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Health · ORBIT" },
       { name: "description", content: "Steps, distance and movement with gentle weekly, monthly and yearly views." },
       { property: "og:title", content: "Health · ORBIT" },
@@ -49,17 +52,15 @@ function Health() {
   return (
     <Page className="space-y-7 pt-6">
       <section className="card-orbit relative overflow-hidden p-6 sm:p-8">
-        <span className="absolute -left-24 -top-24 size-72 rounded-full bg-health/20 blur-3xl" />
-        <span className="absolute -bottom-24 -right-24 size-64 rounded-full bg-feed/10 blur-3xl" />
         <div className="relative flex items-start justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Today · sample day</p>
             <p className="mt-1 text-sm text-muted-foreground">Target {formatNum(goal)} steps</p>
           </div>
-          <button onClick={() => setGoalOpen(true)} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-surface-2 px-3.5 text-sm font-semibold" aria-label="Edit daily step target"><Pencil className="size-3.5" /> Target</button>
+          <Button variant="ghost" onClick={() => setGoalOpen(true)} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-surface-2 px-3.5 text-sm font-semibold" aria-label="Edit daily step target"><Pencil className="size-3.5" /> Target</Button>
         </div>
         <div className="relative mt-2 flex justify-center">
-          <ProgressRing value={steps / goal} size={260} stroke={22} label={`${steps} of ${goal} steps today, ${pct}%`}>
+          <ProgressRing value={steps / goal} size={240} stroke={10} label={`${steps} of ${goal} steps today, ${pct}%`}>
             <div>
               <Footprints className="mx-auto size-6 text-health" />
               <p className="mt-1 font-display text-6xl font-bold tracking-tighter"><CountUp value={steps} /></p>

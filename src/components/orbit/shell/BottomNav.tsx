@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, isActive } from "./nav";
 
 export function BottomNav() {
+  const reduce = useReducedMotion();
   const path = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav
@@ -23,7 +24,7 @@ export function BottomNav() {
               className={cn("relative flex h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-[20px] text-[11px] font-semibold transition-colors", active ? "text-foreground" : "text-muted-foreground")}
             >
               {active && (
-                <motion.span layoutId="bottom-pill" className="absolute inset-0 rounded-[20px] bg-surface-2" transition={{ type: "spring", stiffness: 500, damping: 38 }} />
+                <motion.span layoutId="bottom-pill" className="absolute inset-0 rounded-[20px] bg-accent" transition={{ duration: reduce ? 0 : 0.28 }} />
               )}
               <Icon className="relative size-[22px]" style={{ color: active ? n.tone : undefined }} strokeWidth={active ? 2.3 : 1.9} />
               <span className="relative">{n.label}</span>

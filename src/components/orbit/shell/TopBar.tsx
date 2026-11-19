@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, Bell, Menu } from "lucide-react";
 import { titleFor, PRIMARY_NAV, SECONDARY_NAV } from "./nav";
@@ -13,13 +14,13 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
     <header className="glass sticky top-0 z-30 border-b" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="mx-auto flex h-16 w-full max-w-5xl items-center gap-2 px-3 sm:px-5">
         {isTop ? (
-          <button onClick={onMenu} className="grid size-11 place-items-center rounded-full hover:bg-surface-2 lg:hidden" aria-label="Open workspace menu">
+          <Button variant="ghost" onClick={onMenu} className="grid size-11 place-items-center rounded-full hover:bg-surface-2 lg:hidden" aria-label="Open workspace menu">
             <Menu className="size-5" />
-          </button>
+          </Button>
         ) : (
-          <button onClick={() => router.history.back()} className="grid size-11 place-items-center rounded-full hover:bg-surface-2" aria-label="Go back">
+          <Button variant="ghost" onClick={() => router.history.back()} className="grid size-11 place-items-center rounded-full hover:bg-surface-2" aria-label="Go back">
             <ArrowLeft className="size-5" />
-          </button>
+          </Button>
         )}
         <h1 className="font-display text-lg font-semibold tracking-tight">{titleFor(path)}</h1>
         <span className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-finance/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-finance" title="All data is synthetic and not live">
@@ -30,7 +31,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
             <Bell className="size-5" />
             {unread > 0 && <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-primary ring-2 ring-background" />}
           </Link>
-          <Link to="/settings" className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-primary to-feed font-display text-sm font-bold text-on-accent" aria-label="Profile and settings">
+          <Link to="/settings" className="grid size-9 place-items-center rounded-full bg-primary font-display text-sm font-bold text-on-accent" aria-label="Profile and settings">
             {state.name[0]}
           </Link>
         </div>

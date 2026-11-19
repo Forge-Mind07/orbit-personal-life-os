@@ -6,7 +6,7 @@
 
 @theme inline {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Plus Jakarta Sans", ui-sans-serif, sans-serif;
+  --font-display: "Chakra Petch", "Plus Jakarta Sans", ui-sans-serif, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -58,7 +58,7 @@
 
 /* Light theme */
 :root {
-  --radius: 1rem;
+  --radius: 0.25rem;
   --background: oklch(0.972 0.006 270);
   --foreground: oklch(0.2 0.022 270);
   --surface: oklch(1 0 0);
@@ -67,19 +67,19 @@
   --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.56 0.2 293);
+  --primary: oklch(0.54 0.12 181);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: var(--surface-2);
   --secondary-foreground: var(--foreground);
   --muted: var(--surface-2);
   --muted-foreground: oklch(0.5 0.025 265);
-  --accent: oklch(0.93 0.03 293);
-  --accent-foreground: oklch(0.3 0.1 293);
+  --accent: oklch(0.94 0.035 181);
+  --accent-foreground: oklch(0.3 0.07 181);
   --destructive: oklch(0.58 0.21 25);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.9 0.012 270);
   --input: oklch(0.9 0.012 270);
-  --ring: oklch(0.56 0.2 293);
+  --ring: var(--primary);
   --health: oklch(0.62 0.13 165);
   --finance: oklch(0.7 0.15 70);
   --feed: oklch(0.58 0.15 255);
@@ -117,24 +117,24 @@
 
 /* Dark theme (default) */
 .dark {
-  --background: oklch(0.155 0.012 270);
+  --background: oklch(0.13 0.008 200);
   --foreground: oklch(0.975 0.005 270);
-  --surface: oklch(0.225 0.022 268);
-  --surface-2: oklch(0.27 0.03 270);
+  --surface: oklch(0.175 0.012 185);
+  --surface-2: oklch(0.235 0.018 185);
   --card: var(--surface);
-  --popover: oklch(0.225 0.022 268);
+  --popover: var(--surface);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.709 0.159 293.5);
-  --primary-foreground: oklch(0.16 0.02 280);
+  --primary: oklch(0.82 0.145 181);
+  --primary-foreground: oklch(0.13 0.02 185);
   --secondary: var(--surface-2);
   --muted: var(--surface-2);
-  --muted-foreground: oklch(0.7 0.025 265);
-  --accent: oklch(0.3 0.06 293);
-  --accent-foreground: oklch(0.92 0.05 293);
+  --muted-foreground: oklch(0.72 0.015 185);
+  --accent: oklch(0.26 0.035 185);
+  --accent-foreground: oklch(0.9 0.07 181);
   --destructive: oklch(0.7 0.18 22);
   --border: oklch(1 0 0 / 0.07);
   --input: oklch(1 0 0 / 0.1);
-  --ring: oklch(0.709 0.159 293.5);
+  --ring: var(--primary);
   --health: oklch(0.83 0.14 165);
   --finance: oklch(0.87 0.13 80);
   --feed: oklch(0.75 0.13 255);
@@ -160,7 +160,7 @@
 @utility card-orbit {
   background-color: var(--surface);
   border: 1px solid var(--border);
-  border-radius: calc(var(--radius) + 8px);
+  border-radius: var(--radius);
   box-shadow: var(--shadow-card);
 }
 @utility glass {
@@ -172,7 +172,7 @@
   box-shadow: var(--shadow-float);
 }
 @utility bg-ambient {
-  background-image: var(--ambient);
+  background-image: none;
 }
 @utility tnum {
   font-variant-numeric: tabular-nums;
@@ -235,4 +235,36 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Reference-led geometry shared by every ORBIT screen. */
+:root { --shadow-card: none; --shadow-float: 0 12px 32px color-mix(in oklab, var(--foreground) 12%, transparent); --art-base: oklch(0.14 0.02 185); --art-line: oklch(0.7 0.075 185); --art-dot: oklch(0.87 0.11 181); }
+.dark { --shadow-card: none; --shadow-float: 0 12px 32px oklch(0 0 0 / 0.35); }
+.orbit-shell { letter-spacing: 0; }
+.orbit-shell [class*="tracking-"] { letter-spacing: 0; }
+.orbit-shell [class*="rounded-"]:not(.rounded-full) { border-radius: var(--radius); }
+.orbit-shell .font-display { font-weight: 500; }
+.orbit-shell h1, .orbit-shell h2, .orbit-shell h3 { font-family: var(--font-display); }
+.orbit-shell h2 { text-wrap: balance; }
+.orbit-shell .card-orbit { transition: border-color 250ms ease, background-color 250ms ease; }
+.orbit-shell a.card-orbit:hover { border-color: color-mix(in oklab, var(--primary) 55%, var(--border)); }
+.orbit-page > section.card-orbit { background: transparent; border: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0; }
+.orbit-page > section.card-orbit:first-of-type { border-top: 0; }
+.orbit-page .card-orbit .card-orbit { background: transparent; border: 0; box-shadow: none; }
+.orbit-page [data-reveal="pending"] { opacity: 0; transform: translateY(22px); }
+.orbit-page [data-reveal="visible"] { opacity: 1; transform: translateY(0); transition: opacity 650ms ease, transform 650ms cubic-bezier(0.22,1,0.36,1); transition-delay: var(--reveal-delay, 0ms); }
+.orbit-telemetry { background: var(--surface); border-left: 2px solid var(--primary); }
+.orbit-technical-art { background: var(--art-base); color: var(--art-line); }
+.orbit-technical-art svg { width: 100%; height: 100%; }
+.orbit-technical-art .signal { fill: var(--art-dot); }
+.orbit-technical-art .art-wave { transform-origin: center; animation: orbit-drift 12s ease-in-out infinite alternate; }
+@keyframes orbit-drift { to { transform: translateY(-6px); } }
+@media (max-width: 430px) {
+  .orbit-page .text-5xl { font-size: 2.5rem; }
+  .orbit-page .text-6xl { font-size: 3rem; }
+  .orbit-page .text-5xl > span.text-lg { display: block; margin-left: 0; margin-top: 4px; font-size: 0.875rem; }
+  .orbit-page .size-36 { width: 7rem; height: 7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-page [data-reveal] { opacity: 1; transform: none; transition: none; }
 }

@@ -11,6 +11,8 @@ import { ArticleThumb } from "@/components/orbit/common/ArticleThumb";
 export const Route = createFileRoute("/feed")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Feed · ORBIT" },
       { name: "description", content: "A calm, editorial reading feed by city, nation and world. Illustrative demo articles." },
       { property: "og:title", content: "Feed · ORBIT" },
@@ -48,7 +50,6 @@ function Feed() {
   return (
     <Page className="space-y-6 pt-6">
       <section className="card-orbit relative overflow-hidden p-6">
-        <span className="absolute -right-16 -top-16 size-48 rounded-full bg-feed/20 blur-3xl" />
         <p className="relative flex items-center gap-2 text-sm font-semibold text-feed"><Newspaper className="size-4" /> Daily briefing</p>
         <p className="relative mt-2 font-display text-2xl font-bold tracking-tight">Three things worth your attention</p>
         <ol className="relative mt-4 space-y-3">

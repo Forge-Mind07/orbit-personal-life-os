@@ -30,13 +30,13 @@ export function ProgressRing({ value, size = 220, stroke = 18, color = "var(--he
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={`url(#ring-${size})`}
+          stroke={color}
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={c}
           initial={{ strokeDashoffset: reduce ? c * (1 - v) : c }}
           animate={{ strokeDashoffset: c * (1 - v) }}
-          transition={{ duration: reduce ? 0 : 1.4, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: reduce ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
         />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">{children}</div>

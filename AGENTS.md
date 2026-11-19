@@ -33,3 +33,6 @@ use the editor.
 - ORBIT is a client-only demo: all state lives in `src/lib/orbit/store.tsx` (localStorage), no backend or external API calls — keeps the prototype safe and portable to native later.
 - Domain logic (dates, seeded activity, finance math, parser, feed, chat replies) stays pure in `src/lib/orbit/*`; UI in `src/components/orbit/*` only derives from it, so every widget shows the same numbers.
 - Demo data is deterministic (hash of ISO date), never `Math.random()` — values stay stable across renders and reloads.
+
+- Shared visual tokens and panel geometry live in `src/styles.css`; `Page` owns viewport reveals, so every module shares the reference-led styling and reduced-motion behavior without changing demo logic.
+- Editorial thumbnails use original deterministic vector signal artwork rather than external media, keeping the demo offline and avoiding copied reference assets.

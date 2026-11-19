@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChevronRight, Link2, TrendingDown, TrendingUp } from "lucide-react";
@@ -27,7 +28,6 @@ export function InvestmentsTab() {
   return (
     <div className="space-y-6">
       <section className="card-orbit relative overflow-hidden p-6">
-        <span className="absolute -left-16 -top-20 size-56 rounded-full bg-primary/15 blur-3xl" />
         <div className="relative flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">Portfolio value</p>
           <DemoTag>Sample holdings</DemoTag>
@@ -54,7 +54,7 @@ export function InvestmentsTab() {
         </div>
         <div className="relative mt-3 flex gap-1.5" role="group" aria-label="Chart period">
           {PERIODS.map((x) => (
-            <button key={x} onClick={() => setPeriod(x)} aria-pressed={period === x} className={cn("min-h-10 flex-1 rounded-xl text-xs font-bold", period === x ? "bg-foreground text-background" : "bg-surface-2 text-muted-foreground")}>{x}</button>
+            <Button variant="ghost" key={x} onClick={() => setPeriod(x)} aria-pressed={period === x} className={cn("min-h-10 flex-1 rounded-xl text-xs font-bold", period === x ? "bg-foreground text-background" : "bg-surface-2 text-muted-foreground")}>{x}</Button>
           ))}
         </div>
       </section>
@@ -93,7 +93,7 @@ export function InvestmentsTab() {
             <SectionHeader title="Connect a broker" eyebrow="Not connected" />
             <p className="px-1 text-sm text-muted-foreground">Holdings shown are sample data. Broker sync isn't available in this prototype.</p>
           </div>
-          <button onClick={() => setBroker(true)} className="mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border bg-surface-2 text-sm font-semibold"><Link2 className="size-4" /> Connect broker</button>
+          <Button variant="ghost" onClick={() => setBroker(true)} className="mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border bg-surface-2 text-sm font-semibold"><Link2 className="size-4" /> Connect broker</Button>
         </section>
       </div>
 
@@ -104,7 +104,7 @@ export function InvestmentsTab() {
             const pnl = holdingValue(h) - holdingInvested(h);
             const s = valueSeries(h.symbol, h.ltp, "1M", today, h.ltp + (h.avgPrice - h.ltp) * 0.4).map((x) => x.value);
             return (
-              <button key={h.symbol} onClick={() => setSel(h)} className="flex w-full items-center gap-3 px-5 py-3.5 text-left hover:bg-surface-2/40">
+              <Button variant="ghost" key={h.symbol} onClick={() => setSel(h)} className="flex w-full items-center gap-3 px-5 py-3.5 text-left hover:bg-surface-2/40">
                 <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface-2 font-display text-xs font-bold">{h.symbol.slice(0, 2)}</span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{h.symbol}</p>
@@ -116,7 +116,7 @@ export function InvestmentsTab() {
                   <p className={cn("text-xs font-semibold tnum", pnl >= 0 ? "text-health" : "text-destructive")}>{formatPct((pnl / holdingInvested(h)) * 100)}</p>
                 </div>
                 <ChevronRight className="size-4 text-muted-foreground" />
-              </button>
+              </Button>
             );
           })}
         </div>

@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/connections")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Connections · ORBIT" },
       { name: "description", content: "Device and service connections. Nothing is connected in this demo." },
       { property: "og:title", content: "Connections · ORBIT" },

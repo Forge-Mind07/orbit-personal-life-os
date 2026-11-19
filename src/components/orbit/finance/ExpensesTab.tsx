@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Mic, Plus, Trash2 } from "lucide-react";
@@ -39,7 +40,6 @@ export function ExpensesTab() {
   return (
     <div className="space-y-6">
       <section className="card-orbit relative overflow-hidden p-6">
-        <span className="absolute -right-16 -top-16 size-48 rounded-full bg-finance/15 blur-3xl" />
         <p className="text-sm font-medium text-muted-foreground">Spent in {fmt(today, "MMMM")}</p>
         <p className="mt-1 font-display text-5xl font-bold tracking-tight tnum">{formatINR(spent)}<span className="ml-2 text-lg font-medium text-muted-foreground">/ {formatINR(state.budget)}</span></p>
         <div className="mt-5 h-3 overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
@@ -50,13 +50,13 @@ export function ExpensesTab() {
           <span className="text-muted-foreground">{Math.round(pct)}% used · {daysLeft} days left{!over ? ` · ~${formatINR(remaining / daysLeft)}/day` : ""}</span>
         </div>
         <div className="mt-6 grid grid-cols-[1fr_auto] gap-3">
-          <button onClick={() => { setDraft(undefined); setAddOpen(true); }} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-finance text-base font-bold text-on-accent active:scale-[0.98]">
+          <Button variant="ghost" onClick={() => { setDraft(undefined); setAddOpen(true); }} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-finance text-base font-bold text-on-accent active:scale-[0.98]">
             <Plus className="size-5" /> Add expense
-          </button>
-          <button onClick={() => setVoice(true)} className="relative grid size-14 place-items-center rounded-2xl border-2 border-finance/60 bg-finance/10 text-finance active:scale-95" aria-label="Voice entry (simulated)">
+          </Button>
+          <Button variant="ghost" onClick={() => setVoice(true)} className="relative grid size-14 place-items-center rounded-2xl border-2 border-finance/60 bg-finance/10 text-finance active:scale-95" aria-label="Voice entry (simulated)">
             <Mic className="size-6" />
             <span className="absolute -right-1.5 -top-1.5 rounded-full bg-surface-2 px-1.5 text-[9px] font-bold uppercase text-muted-foreground">Sim</span>
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -102,11 +102,11 @@ export function ExpensesTab() {
             <ul className="min-w-0 flex-1 space-y-1">
               {cats.map((c) => (
                 <li key={c.category}>
-                  <button onClick={() => setFilter(filter === c.category ? "All" : c.category)} className="flex min-h-8 w-full items-center gap-2 rounded-lg px-1 text-sm hover:bg-surface-2" aria-pressed={filter === c.category}>
+                  <Button variant="ghost" onClick={() => setFilter(filter === c.category ? "All" : c.category)} className="flex min-h-8 w-full items-center gap-2 rounded-lg px-1 text-sm hover:bg-surface-2" aria-pressed={filter === c.category}>
                     <span className="size-2.5 shrink-0 rounded-full" style={{ background: c.color }} />
                     <span className="truncate text-muted-foreground">{c.category}</span>
                     <span className="ml-auto font-semibold tnum">{formatINR(c.total)}</span>
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -138,7 +138,7 @@ export function ExpensesTab() {
                       </div>
                       <p className="font-display font-semibold tnum">{formatINR(e.amount)}</p>
                       {e.source !== "seed" && (
-                        <button onClick={() => { removeExpense(e.id); toast("Expense removed"); }} className="grid size-10 place-items-center rounded-full text-muted-foreground hover:bg-surface-2 hover:text-destructive" aria-label={`Delete ${e.description}`}><Trash2 className="size-4" /></button>
+                        <Button variant="ghost" onClick={() => { removeExpense(e.id); toast("Expense removed"); }} className="grid size-10 place-items-center rounded-full text-muted-foreground hover:bg-surface-2 hover:text-destructive" aria-label={`Delete ${e.description}`}><Trash2 className="size-4" /></Button>
                       )}
                     </div>
                   );

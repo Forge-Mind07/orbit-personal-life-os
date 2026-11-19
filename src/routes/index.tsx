@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
@@ -20,6 +21,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Home · ORBIT" },
       { name: "description", content: "Your day at a glance: steps, spending, portfolio and a calm daily briefing." },
       { property: "og:title", content: "Home · ORBIT — Personal Life OS" },
@@ -62,11 +65,10 @@ function Home() {
         <h2 className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">{greeting(hour)}, {state.name}.</h2>
       </motion.header>
 
-      <motion.section {...rise(1)} className="card-orbit relative overflow-hidden p-6 sm:p-8" aria-labelledby="today-steps">
-        <span className="absolute -right-20 -top-20 size-64 rounded-full bg-health/15 blur-3xl" />
+      <motion.section {...rise(1)} className="relative overflow-hidden py-6 sm:py-8" aria-labelledby="today-steps">
         <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:gap-10">
           <Link to="/health" aria-label="Open health details">
-            <ProgressRing value={steps / goal} size={232} stroke={20} label={`${steps} of ${goal} steps, ${pct}% complete`}>
+            <ProgressRing value={steps / goal} size={216} stroke={10} label={`${steps} of ${goal} steps, ${pct}% complete`}>
               <div>
                 <Footprints className="mx-auto size-5 text-health" />
                 <p id="today-steps" className="mt-1 font-display text-5xl font-bold tracking-tight"><CountUp value={steps} /></p>
@@ -74,7 +76,7 @@ function Home() {
               </div>
             </ProgressRing>
           </Link>
-          <div className="w-full flex-1 text-center sm:text-left">
+          <div className="orbit-telemetry w-full flex-1 p-5 text-center sm:text-left">
             <p className="inline-flex rounded-full bg-health/15 px-3 py-1 text-sm font-bold text-health">{pct}% complete</p>
             <p className="mt-4 text-lg font-medium leading-snug">
               {left > 0 ? <>About <span className="font-bold tnum">{formatNum(left)}</span> steps to go. An easy evening stroll would close it out.</> : "Goal reached. Anything more today is a bonus."}
@@ -93,12 +95,12 @@ function Home() {
           {week.map(({ day, status }) => {
             const h = day.steps ? Math.max(0.08, Math.min(1, day.steps / goal)) : 0.06;
             return (
-              <button key={day.date} onClick={() => setSel(day.date)} className={cn("flex min-h-28 flex-col items-center justify-end gap-2 rounded-2xl py-2 transition-colors hover:bg-surface-2", status === "today" && "bg-surface-2/70")} aria-label={`${fmt(day.date, "EEEE")}: ${STATUS_LABEL[status]}${day.steps ? `, ${day.steps} steps` : ""}`}>
+              <Button variant="ghost" key={day.date} onClick={() => setSel(day.date)} className={cn("flex min-h-28 flex-col items-center justify-end gap-2 rounded-2xl py-2 transition-colors hover:bg-surface-2", status === "today" && "bg-surface-2/70")} aria-label={`${fmt(day.date, "EEEE")}: ${STATUS_LABEL[status]}${day.steps ? `, ${day.steps} steps` : ""}`}>
                 <div className="relative flex h-16 w-3 items-end overflow-hidden rounded-full bg-track" style={{ background: "var(--track)" }}>
                   <motion.span className="w-full rounded-full" style={{ background: STATUS_COLOR[status] }} initial={reduce ? false : { height: 0 }} animate={{ height: `${h * 100}%` }} transition={{ duration: 0.8, delay: 0.2 }} />
                 </div>
                 <span className={cn("text-xs font-semibold", status === "today" ? "text-foreground" : "text-muted-foreground")}>{fmt(day.date, "EEEEE")}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -136,8 +138,7 @@ function Home() {
       </motion.section>
 
       <motion.section {...rise(5)}>
-        <Link to="/chat" className="group relative block overflow-hidden rounded-[28px] border border-primary/30 p-6" style={{ background: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 22%, var(--surface)), var(--surface) 60%)" }}>
-          <span className="absolute -right-10 -top-10 size-40 rounded-full bg-primary/30 blur-3xl transition-transform duration-700 group-hover:scale-125" />
+        <Link to="/chat" className="group relative block overflow-hidden border-y border-primary/30 py-6" >
           <div className="relative flex items-center gap-2 text-sm font-semibold text-primary"><Sparkles className="size-4" /> Demo assistant</div>
           <p className="relative mt-3 font-display text-2xl font-bold tracking-tight">Ask Orbit anything</p>
           <p className="relative mt-1 text-sm text-muted-foreground">"How did I do this week?" · "Where's my money going?"</p>

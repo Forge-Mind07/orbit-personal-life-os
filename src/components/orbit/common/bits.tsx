@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,19 +27,19 @@ export function LinkAction({ to, children }: { to: "/feed" | "/health" | "/finan
 
 export function Chip({ active, onClick, children, className, ariaLabel }: { active?: boolean; onClick?: () => void; children: ReactNode; className?: string; ariaLabel?: string }) {
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={onClick}
       aria-pressed={active}
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition-all",
-        active ? "border-transparent bg-foreground text-background" : "bg-surface text-muted-foreground hover:text-foreground",
+        "inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-md border px-4 text-sm font-semibold transition-all",
+        active ? "border-transparent bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground",
         className,
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -62,7 +63,7 @@ export function DemoTag({ children = "Demo" }: { children?: ReactNode }) {
 
 export function PrimaryButton({ children, className, ...p }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
+    <Button variant="ghost"
       {...p}
       className={cn(
         "inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-bold text-primary-foreground transition-transform active:scale-[0.98] disabled:opacity-40",
@@ -70,12 +71,12 @@ export function PrimaryButton({ children, className, ...p }: React.ButtonHTMLAtt
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 export function GhostButton({ children, className, ...p }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
+    <Button variant="ghost"
       {...p}
       className={cn(
         "inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-surface-2 px-5 text-sm font-semibold text-foreground transition-transform active:scale-[0.98]",
@@ -83,7 +84,7 @@ export function GhostButton({ children, className, ...p }: React.ButtonHTMLAttri
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -92,11 +93,31 @@ export function ChartTooltip({ active, payload, label, format }: { active?: bool
   return (
     <div className="rounded-xl border bg-popover px-3 py-2 text-xs shadow-float">
       <p className="text-muted-foreground">{label}</p>
-      <p className="mt-0.5 font-display text-sm font-semibold tnum">{format(payload[0]!.value)}</p>
+      <p className="mt-0.5 font-display text-sm font-semibold tnum">{format(payload[0]?.value ?? 0)}</p>
     </div>
   );
 }
 
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("mx-auto w-full max-w-5xl px-4 pt-2 sm:px-6", className)}>{children}</div>;
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+          entry.target.dataset["reveal"] = "visible";
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05 });
+    Array.from(node.children).forEach((child, i) => {
+      if (!(child instanceof HTMLElement) || child.tagName === "FORM") return;
+      child.dataset["reveal"] = "pending";
+      child.style.setProperty("--reveal-delay", `${Math.min(i % 4, 3) * 75}ms`);
+      observer.observe(child);
+    });
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={ref} className={cn("orbit-page mx-auto w-full max-w-6xl px-4 pt-2 sm:px-6 lg:px-10", className)}>{children}</div>;
 }

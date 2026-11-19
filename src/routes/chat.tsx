@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
@@ -11,6 +12,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Chat · ORBIT" },
       { name: "description", content: "A demo assistant that answers from your sample activity, spending and reading data." },
       { property: "og:title", content: "Chat · ORBIT" },
@@ -42,11 +45,11 @@ function Bubble({ m, onRetry }: { m: ChatMessage; onRetry: () => void }) {
           </div>
           {!mine && (
             <div className="mt-1 flex gap-1 pl-1">
-              <button onClick={copy} className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground hover:bg-surface-2" aria-label="Copy response">
+              <Button variant="ghost" onClick={copy} className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground hover:bg-surface-2" aria-label="Copy response">
                 {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {copied ? "Copied" : "Copy"}
-              </button>
+              </Button>
               {m.status === "error" && (
-                <button onClick={onRetry} className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground hover:bg-surface-2"><RotateCcw className="size-3.5" /> Retry</button>
+                <Button variant="ghost" onClick={onRetry} className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground hover:bg-surface-2"><RotateCcw className="size-3.5" /> Retry</Button>
               )}
             </div>
           )}
@@ -58,12 +61,13 @@ function Bubble({ m, onRetry }: { m: ChatMessage; onRetry: () => void }) {
 
 function Chat() {
   const { state, update, today, allExpenses } = useOrbit();
+  const reduce = useReducedMotion();
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
   const end = useRef<HTMLDivElement>(null);
   const msgs = state.chat;
 
-  useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs.length, typing]);
+  useEffect(() => { end.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "end" }); }, [msgs.length, typing, reduce]);
 
   const respond = (prompt: string) => {
     setTyping(true);
@@ -95,14 +99,14 @@ function Chat() {
           <span className="size-1.5 rounded-full bg-muted-foreground" /> Laptop agent • offline
         </Link>
         {msgs.length > 0 && (
-          <button onClick={() => update((s) => ({ ...s, chat: [] }))} className="ml-auto inline-flex min-h-8 items-center gap-1 rounded-full px-3 text-xs text-muted-foreground hover:bg-surface-2"><Trash2 className="size-3.5" /> Clear</button>
+          <Button variant="ghost" onClick={() => update((s) => ({ ...s, chat: [] }))} className="ml-auto inline-flex min-h-8 items-center gap-1 rounded-full px-3 text-xs text-muted-foreground hover:bg-surface-2"><Trash2 className="size-3.5" /> Clear</Button>
         )}
       </div>
 
       <div className="flex-1 py-6" aria-live="polite">
         {msgs.length === 0 ? (
           <div className="flex flex-col items-center pt-6 text-center">
-            <div className="grid size-16 place-items-center rounded-3xl bg-gradient-to-br from-primary to-feed text-on-accent shadow-float"><Sparkles className="size-7" /></div>
+            <div className="grid size-16 place-items-center rounded-3xl bg-primary text-on-accent shadow-float"><Sparkles className="size-7" /></div>
             <h2 className="mt-5 font-display text-2xl font-bold tracking-tight">What would you like to know?</h2>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">Answers come from your demo data on this device. No AI service is called.</p>
             <Link to="/connections" className="card-orbit mt-6 flex w-full max-w-md items-center gap-3 p-4 text-left">
@@ -110,9 +114,9 @@ function Chat() {
               <div className="flex-1"><p className="font-semibold">Laptop agent</p><p className="text-xs text-muted-foreground">Offline — not connected</p></div>
               <span className="text-xs font-semibold text-primary">Set up</span>
             </Link>
-            <div className="mt-6 grid w-full max-w-md gap-2">
+            <div className="mt-6 grid w-full max-w-md gap-2 sm:grid-cols-2">
               {QUICK_PROMPTS.map((p) => (
-                <button key={p} onClick={() => send(p)} className="min-h-12 rounded-2xl border bg-surface px-4 text-left text-sm font-semibold hover:border-primary/50">{p}</button>
+                <Button variant="ghost" key={p} onClick={() => send(p)} className="h-auto min-h-12 whitespace-normal rounded-2xl border bg-surface px-4 py-3 text-left text-sm font-semibold hover:border-primary/50">{p}</Button>
               ))}
             </div>
           </div>
@@ -129,7 +133,7 @@ function Chat() {
             )}
             {!typing && (
               <div className="no-scrollbar flex gap-2 overflow-x-auto pt-2">
-                {QUICK_PROMPTS.map((p) => <button key={p} onClick={() => send(p)} className="min-h-10 shrink-0 rounded-full border px-3 text-xs font-semibold text-muted-foreground hover:text-foreground">{p}</button>)}
+                {QUICK_PROMPTS.map((p) => <Button variant="ghost" key={p} onClick={() => send(p)} className="min-h-10 shrink-0 rounded-full border px-3 text-xs font-semibold text-muted-foreground hover:text-foreground">{p}</Button>)}
               </div>
             )}
           </div>
@@ -147,9 +151,9 @@ function Chat() {
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
             rows={1}
             placeholder="Ask Orbit anything…"
-            className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-muted-foreground"
+            className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-muted-foreground"
           />
-          <button type="submit" disabled={!text.trim() || typing} className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-30" aria-label="Send message"><ArrowUp className="size-5" /></button>
+          <Button variant="ghost" type="submit" disabled={!text.trim() || typing} className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-30" aria-label="Send message"><ArrowUp className="size-5" /></Button>
         </div>
       </form>
     </Page>

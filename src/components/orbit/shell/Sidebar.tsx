@@ -14,7 +14,7 @@ function Row({ item, path, onNavigate }: { item: NavItem; path: string; onNaviga
       aria-current={active ? "page" : undefined}
       className={cn(
         "group flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors",
-        active ? "bg-surface-2 text-foreground" : "text-muted-foreground hover:bg-surface-2/60 hover:text-foreground",
+        active ? "border-l-2 border-primary bg-accent text-foreground" : "text-muted-foreground hover:bg-surface-2/60 hover:text-foreground",
       )}
     >
       <span className="grid size-8 place-items-center rounded-lg" style={{ color: active ? item.tone : undefined }}>
@@ -48,7 +48,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: (() => void) | und
         <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">System</p>
         {SECONDARY_NAV.map((n) => <Row key={n.to} item={n} path={path} onNavigate={onNavigate} />)}
       </nav>
-      <div className="mt-auto rounded-2xl border border-dashed border-primary/40 bg-accent/40 p-4">
+      <div className="mt-auto rounded-2xl border border-dashed border-primary/40 bg-surface p-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-accent-foreground">
           <FlaskConical className="size-4" /> Demo prototype
         </div>

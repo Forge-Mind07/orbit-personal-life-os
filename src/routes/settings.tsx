@@ -11,6 +11,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Settings · ORBIT" },
       { name: "description", content: "Theme, step target, monthly budget, city, topics and demo data controls." },
       { property: "og:title", content: "Settings · ORBIT" },

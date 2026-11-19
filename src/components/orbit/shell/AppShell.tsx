@@ -28,8 +28,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const reduce = useReducedMotion();
   if (!ready) return <Splash />;
   return (
-    <div className="min-h-dvh bg-ambient bg-fixed">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r bg-sidebar lg:block">
+    <div className="orbit-shell min-h-dvh bg-background">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r bg-sidebar lg:block">
         <SidebarContent />
       </aside>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -39,14 +39,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SidebarContent onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
-      <div className="lg:pl-72">
+      <div className="lg:pl-60">
         <TopBar onMenu={() => setOpen(true)} />
 
           <motion.main
             key={path}
-            initial={reduce ? false : { opacity: 0, y: 8 }}
+            initial={reduce ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
+            transition={{ duration: reduce ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
             className="pb-safe-nav lg:pb-12"
           >
             {children}

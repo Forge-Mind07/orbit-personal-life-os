@@ -14,6 +14,7 @@ export const Route = createFileRoute("/article/$id")({
   },
   head: ({ loaderData }) => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
       { title: loaderData ? `${loaderData.title} · ORBIT Reader` : "Article unavailable · ORBIT" },
       { name: "description", content: loaderData?.dek ?? "Illustrative demo article" },
       { property: "og:title", content: loaderData?.title ?? "ORBIT Reader" },

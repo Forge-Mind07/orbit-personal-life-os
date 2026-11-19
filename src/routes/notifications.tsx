@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/notifications")({
   head: () => ({
     meta: [
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
       { title: "Notifications · ORBIT" },
       { name: "description", content: "Gentle nudges about your activity, budget and briefing." },
       { property: "og:title", content: "Notifications · ORBIT" },
