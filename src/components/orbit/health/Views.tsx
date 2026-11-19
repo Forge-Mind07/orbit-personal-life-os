@@ -75,7 +75,7 @@ export function WeekView({ onSelect }: { onSelect: (d: ISODate) => void }) {
   const anchor = addDays(today, offset * 7);
   const s = useMemo(() => summarize(weekDates(anchor), goal, today), [anchor, goal, today]);
   const data = s.days.map((d) => ({ date: d.date, label: fmt(d.date, "EEE"), v: d.steps ?? 0, status: dayStatus(d, goal, today) }));
-  const range = `${fmt(s.days[0].date, "d MMM")} – ${fmt(s.days[6].date, "d MMM")}`;
+  const range = `${fmt(s.days[0]!.date, "d MMM")} – ${fmt(s.days[6]!.date, "d MMM")}`;
   return (
     <div className="space-y-5">
       <div className="card-orbit p-5">
@@ -118,7 +118,7 @@ export function MonthView({ onSelect }: { onSelect: (d: ISODate) => void }) {
   const [offset, setOffset] = useState(0);
   const anchor = addMonths(today, offset);
   const s = useMemo(() => summarize(monthDates(anchor), goal, today), [anchor, goal, today]);
-  const lead = weekdayIndex(s.days[0].date);
+  const lead = weekdayIndex(s.days[0]!.date);
   return (
     <div className="space-y-5">
       <div className="card-orbit p-5">

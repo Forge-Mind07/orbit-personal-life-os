@@ -87,12 +87,12 @@ export function GhostButton({ children, className, ...p }: React.ButtonHTMLAttri
   );
 }
 
-export function ChartTooltip({ active, payload, label, format }: { active?: boolean; payload?: { value: number; name?: string }[]; label?: string; format: (v: number) => string }) {
+export function ChartTooltip({ active, payload, label, format }: { active?: boolean | undefined; payload?: { value: number; name?: string | undefined }[] | undefined; label?: string | undefined; format: (v: number) => string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border bg-popover px-3 py-2 text-xs shadow-float">
       <p className="text-muted-foreground">{label}</p>
-      <p className="mt-0.5 font-display text-sm font-semibold tnum">{format(payload[0].value)}</p>
+      <p className="mt-0.5 font-display text-sm font-semibold tnum">{format(payload[0]!.value)}</p>
     </div>
   );
 }

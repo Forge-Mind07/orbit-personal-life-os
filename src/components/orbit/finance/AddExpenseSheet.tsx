@@ -18,7 +18,7 @@ export interface ExpenseDraft {
   source: Expense["source"];
 }
 
-export function AddExpenseSheet({ open, onOpenChange, initial }: { open: boolean; onOpenChange: (o: boolean) => void; initial?: Partial<ExpenseDraft> }) {
+export function AddExpenseSheet({ open, onOpenChange, initial }: { open: boolean; onOpenChange: (o: boolean) => void; initial?: Partial<ExpenseDraft> | undefined }) {
   const { today, addExpense } = useOrbit();
   const blank: ExpenseDraft = { amount: "", description: "", category: null, date: today, payment: "UPI", source: "manual" };
   const [d, setD] = useState<ExpenseDraft>(blank);

@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- ORBIT is a client-only demo: all state lives in `src/lib/orbit/store.tsx` (localStorage), no backend or external API calls — keeps the prototype safe and portable to native later.
+- Domain logic (dates, seeded activity, finance math, parser, feed, chat replies) stays pure in `src/lib/orbit/*`; UI in `src/components/orbit/*` only derives from it, so every widget shows the same numbers.
+- Demo data is deterministic (hash of ISO date), never `Math.random()` — values stay stable across renders and reloads.

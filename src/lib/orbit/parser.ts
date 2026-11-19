@@ -16,7 +16,7 @@ const DATE_WORDS = /\b(today|yesterday|day before yesterday|last\s+\w+|on\s+(mon
 export function parseExpense(text: string, today: ISODate): ParsedExpense {
   const t = text.toLowerCase();
   const m = t.replace(/,(?=\d{3})/g, "").match(/(?:₹|rs\.?|inr)?\s*(\d+(?:\.\d+)?)\s*(k\b)?/i);
-  let amount: number | null = m ? parseFloat(m[1]) * (m[2] ? 1000 : 1) : null;
+  let amount: number | null = m ? parseFloat(m[1] ?? "0") * (m[2] ? 1000 : 1) : null;
   if (amount !== null) amount = Math.round(amount);
 
   let date = today;

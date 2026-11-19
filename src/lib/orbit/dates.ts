@@ -9,7 +9,7 @@ export function toISO(d: Date): ISODate {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 export function fromISO(s: ISODate): Date {
-  const [y, m, d] = s.split("-").map(Number);
+  const [y = 1970, m = 1, d = 1] = s.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
 export function addDays(s: ISODate, n: number): ISODate {

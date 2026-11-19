@@ -225,16 +225,18 @@ export function computeInsights(goal: number, today: ISODate): Insight[] {
   const byWd = Array.from({ length: 7 }, () => ({ t: 0, n: 0 }));
   for (const d of range(addDays(today, -56), 56)) {
     const day = seedDay(d, today);
-    if (day.steps !== null) { byWd[weekdayIndex(d)].t += day.steps; byWd[weekdayIndex(d)].n++; }
+    if (day.steps !== null) { const w = byWd[weekdayIndex(d)]!; w.t += day.steps; w.n++; }
   }
   const names = ["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"];
   const avgs = byWd.map((x) => (x.n ? x.t / x.n : 0));
   const bestWd = avgs.indexOf(Math.max(...avgs));
+  const bestName = names[bestWd] ?? "Weekdays";
+  const bestAvg = avgs[bestWd] ?? 0;
   out.push({
     id: "weekday",
-    title: `${names[bestWd]} are your strongest`,
-    body: `Over the last 8 weeks you average ${Math.round(avgs[bestWd]).toLocaleString("en-IN")} steps on ${names[bestWd]}. Worth protecting that routine.`,
-    metric: names[bestWd].slice(0, 3),
+    title: `${bestName} are your strongest`,
+    body: `Over the last 8 weeks you average ${Math.round(bestAvg).toLocaleString("en-IN")} steps on ${bestName}. Worth protecting that routine.`,
+    metric: bestName.slice(0, 3),
     tone: "violet",
   });
   const m = summarize(monthDates(today).filter((d) => d < today), goal, today);

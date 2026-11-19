@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, SECONDARY_NAV, isActive, type NavItem } from "./nav";
 import { useOrbit } from "@/lib/orbit/store";
 
-function Row({ item, path, onNavigate }: { item: NavItem; path: string; onNavigate?: () => void }) {
+function Row({ item, path, onNavigate }: { item: NavItem; path: string; onNavigate?: (() => void) | undefined }) {
   const active = isActive(item.to, path);
   const Icon = item.icon;
   return (
@@ -26,7 +26,7 @@ function Row({ item, path, onNavigate }: { item: NavItem; path: string; onNaviga
   );
 }
 
-export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarContent({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { state } = useOrbit();
   return (

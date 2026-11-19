@@ -9,7 +9,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
   ts: number;
-  status?: "error";
+  status?: "error" | undefined;
 }
 
 export const QUICK_PROMPTS = [

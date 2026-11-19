@@ -45,7 +45,7 @@ export function ExpensesTab() {
         <div className="mt-5 h-3 overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
           <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: over ? "var(--destructive)" : "linear-gradient(90deg, var(--finance), color-mix(in oklab, var(--finance) 60%, var(--cat-shopping)))" }} />
         </div>
-        <div className="mt-3 flex justify-between text-sm">
+        <div className="mt-3 flex flex-wrap justify-between gap-x-3 gap-y-1 text-sm">
           <span className={over ? "font-semibold text-destructive" : "font-semibold"}>{over ? `${formatINR(-remaining)} over` : `${formatINR(remaining)} left`}</span>
           <span className="text-muted-foreground">{Math.round(pct)}% used · {daysLeft} days left{!over ? ` · ~${formatINR(remaining / daysLeft)}/day` : ""}</span>
         </div>
@@ -92,7 +92,7 @@ export function ExpensesTab() {
                   <Pie data={cats} dataKey="total" nameKey="category" innerRadius="68%" outerRadius="100%" paddingAngle={2} stroke="none" onClick={(d: { category?: Category }) => d.category && setFilter(d.category)}>
                     {cats.map((c) => <Cell key={c.category} fill={c.color} opacity={filter === "All" || filter === c.category ? 1 : 0.25} className="cursor-pointer" />)}
                   </Pie>
-                  <Tooltip content={({ active, payload }) => active && payload?.length ? <ChartTooltip active label={String(payload[0].name)} payload={[{ value: Number(payload[0].value) }]} format={formatINR} /> : null} />
+                  <Tooltip content={({ active, payload }) => active && payload?.length ? <ChartTooltip active label={String(payload[0]!.name)} payload={[{ value: Number(payload[0]!.value) }]} format={formatINR} /> : null} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">

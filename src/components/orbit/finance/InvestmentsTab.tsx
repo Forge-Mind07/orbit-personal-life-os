@@ -19,8 +19,8 @@ export function InvestmentsTab() {
   const [broker, setBroker] = useState(false);
   const p = portfolioSummary();
   const series = useMemo(() => valueSeries("portfolio", p.value, period, today), [p.value, period, today]);
-  const change = series[series.length - 1].value - series[0].value;
-  const changePct = (change / series[0].value) * 100;
+  const change = series[series.length - 1]!.value - series[0]!.value;
+  const changePct = (change / series[0]!.value) * 100;
   const alloc = sectorAllocation();
   const up = change >= 0;
 
@@ -36,7 +36,7 @@ export function InvestmentsTab() {
         <p className={cn("relative mt-1 inline-flex items-center gap-1 text-sm font-semibold", up ? "text-health" : "text-destructive")}>
           {up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />} {formatINR(change)} ({formatPct(changePct)}) · {period}
         </p>
-        <div className="relative -mx-2 mt-4 h-48" role="img" aria-label={`Portfolio value over ${period}, from ${formatINR(series[0].value)} to ${formatINR(p.value)}`}>
+        <div className="relative -mx-2 mt-4 h-48" role="img" aria-label={`Portfolio value over ${period}, from ${formatINR(series[0]!.value)} to ${formatINR(p.value)}`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={series} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
               <defs>
