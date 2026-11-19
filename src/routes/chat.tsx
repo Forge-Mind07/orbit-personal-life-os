@@ -1,161 +1,116 @@
 import { Button } from "@/components/ui/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import { AlertTriangle, ArrowUp, Check, Copy, Laptop, RotateCcw, Sparkles, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowUp, Footprints, Laptop, Mic, Orbit, Plus, BookOpen, Wallet, ChartNoAxesCombined, MessageSquare, ShieldCheck } from "lucide-react";
 import { useOrbit } from "@/lib/orbit/store";
-import { QUICK_PROMPTS, demoReply, type ChatMessage } from "@/lib/orbit/chat";
-import { Page } from "@/components/orbit/common/bits";
-import { cn } from "@/lib/utils";
+import { QUICK_PROMPTS, demoReply } from "@/lib/orbit/chat";
+import { ChatArt } from "@/components/orbit/chat/ChatArt";
+import { MessageBubble } from "@/components/orbit/chat/MessageBubble";
+import { VoiceMode } from "@/components/orbit/chat/VoiceMode";
+import "@/components/orbit/chat/chat.css";
 
 export const Route = createFileRoute("/chat")({
-  head: () => ({
-    meta: [
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:type", content: "website" },
-      { title: "Chat · ORBIT" },
-      { name: "description", content: "A demo assistant that answers from your sample activity, spending and reading data." },
-      { property: "og:title", content: "Chat · ORBIT" },
-      { property: "og:description", content: "A demo assistant grounded in your sample Orbit data." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Orbit Intelligence · ORBIT" },
+    { name: "description", content: "Your private, local demo workspace for activity, spending and reading, with an interactive simulated voice preview." },
+    { property: "og:title", content: "Orbit Intelligence · ORBIT" },
+    { property: "og:description", content: "A thoughtful demo chat workspace grounded in your ORBIT sample data." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Chat,
 });
-
-function Bubble({ m, onRetry }: { m: ChatMessage; onRetry: () => void }) {
-  const [copied, setCopied] = useState(false);
-  const reduce = useReducedMotion();
-  const mine = m.role === "user";
-  const copy = async () => {
-    try { await navigator.clipboard.writeText(m.text); setCopied(true); setTimeout(() => setCopied(false), 1500); }
-    catch { toast.error("Couldn't copy to clipboard"); }
-  };
-  return (
-    <motion.div initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-      <div className={cn("max-w-[86%]", mine ? "" : "flex gap-3")}>
-        {!mine && <span className="mt-1 grid size-8 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary"><Sparkles className="size-4" /></span>}
-        <div>
-          <div className={cn(
-            "whitespace-pre-wrap rounded-3xl px-4 py-3 text-[15px] leading-relaxed",
-            mine ? "rounded-br-lg bg-primary text-primary-foreground" : m.status === "error" ? "rounded-tl-lg border border-destructive/40 bg-destructive/10" : "rounded-tl-lg border bg-surface",
-          )}>
-            {m.status === "error" && <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-destructive"><AlertTriangle className="size-4" /> Couldn't complete</p>}
-            {m.text}
-          </div>
-          {!mine && (
-            <div className="mt-1 flex gap-1 pl-1">
-              <Button variant="ghost" onClick={copy} className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground hover:bg-surface-2" aria-label="Copy response">
-                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {copied ? "Copied" : "Copy"}
-              </Button>
-              {m.status === "error" && (
-                <Button variant="ghost" onClick={onRetry} className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground hover:bg-surface-2"><RotateCcw className="size-3.5" /> Retry</Button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+const SUGGESTIONS = [
+  { icon: Footprints, title: "Find my rhythm", subtitle: "Your week in movement", prompt: QUICK_PROMPTS[0] ?? "Summarize my week of activity" },
+  { icon: Wallet, title: "Make sense of spending", subtitle: "A clearer view of your budget", prompt: QUICK_PROMPTS[1] ?? "How are my expenses this month?" },
+  { icon: BookOpen, title: "Something worth reading", subtitle: "Picks from your interests", prompt: QUICK_PROMPTS[2] ?? "What should I read today?" },
+  { icon: ChartNoAxesCombined, title: "See the bigger picture", subtitle: "Your sample portfolio", prompt: QUICK_PROMPTS[3] ?? "How is my portfolio doing?" },
+];
 
 function Chat() {
   const { state, update, today, allExpenses } = useOrbit();
-  const reduce = useReducedMotion();
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const busy = useRef(false);
+  const sequence = useRef(0);
   const end = useRef<HTMLDivElement>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const closeVoice = useCallback(() => setVoiceOpen(false), []);
   const msgs = state.chat;
-
-  useEffect(() => { end.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "end" }); }, [msgs.length, typing, reduce]);
-
+  const history = msgs.filter((m) => m.role === "user");
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(() => {
+    if (!msgs.length && !typing) return;
+    end.current?.scrollIntoView({ behavior: "auto", block: "nearest" });
+  }, [msgs.length, typing]);
   const respond = (prompt: string) => {
-    setTyping(true);
-    setTimeout(() => {
+    busy.current = true; setTyping(true);
+    timer.current = setTimeout(() => {
       const r = demoReply(prompt, { today, goal: state.stepGoal, budget: state.budget, expenses: allExpenses, topics: state.topics, city: state.city });
-      update((s) => ({ ...s, chat: [...s.chat, { id: `a-${Date.now()}`, role: "assistant", text: r.text, ts: Date.now(), status: r.error ? "error" : undefined }] }));
-      setTyping(false);
-    }, 900 + Math.min(900, prompt.length * 12));
+      sequence.current += 1;
+      update((s) => ({ ...s, chat: [...s.chat, { id: `a-${Date.now()}-${sequence.current}`, role: "assistant", text: r.text, ts: Date.now(), status: r.error ? "error" : undefined }] }));
+      busy.current = false; setTyping(false); timer.current = null;
+    }, 1100);
   };
   const send = (raw: string) => {
     const t = raw.trim();
-    if (!t || typing) return;
-    update((s) => ({ ...s, chat: [...s.chat, { id: `u-${Date.now()}`, role: "user", text: t, ts: Date.now() }] }));
-    setText("");
-    respond(t);
+    if (!t || busy.current) return;
+    sequence.current += 1;
+    update((s) => ({ ...s, chat: [...s.chat, { id: `u-${Date.now()}-${sequence.current}`, role: "user", text: t, ts: Date.now() }] }));
+    setText(""); respond(t);
+  };
+  const newChat = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null; busy.current = false; setTyping(false); setText("");
+    update((s) => ({ ...s, chat: [] }));
+    composer.current?.focus({ preventScroll: true });
   };
   const retry = (id: string) => {
+    if (busy.current) return;
     const idx = msgs.findIndex((m) => m.id === id);
     const prev = [...msgs.slice(0, idx)].reverse().find((m) => m.role === "user");
+    if (!prev) return;
     update((s) => ({ ...s, chat: s.chat.filter((m) => m.id !== id) }));
-    if (prev) respond(prev.text);
+    respond(prev.text);
   };
-
-  return (
-    <Page className="flex min-h-[calc(100dvh-10rem)] max-w-3xl flex-col pt-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary"><Sparkles className="size-3.5" /> Demo assistant</span>
-        <Link to="/connections" className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
-          <span className="size-1.5 rounded-full bg-muted-foreground" /> Laptop agent • offline
-        </Link>
-        {msgs.length > 0 && (
-          <Button variant="ghost" onClick={() => update((s) => ({ ...s, chat: [] }))} className="ml-auto inline-flex min-h-8 items-center gap-1 rounded-full px-3 text-xs text-muted-foreground hover:bg-surface-2"><Trash2 className="size-3.5" /> Clear</Button>
-        )}
-      </div>
-
-      <div className="flex-1 py-6" aria-live="polite">
-        {msgs.length === 0 ? (
-          <div className="flex flex-col items-center pt-6 text-center">
-            <div className="grid size-16 place-items-center rounded-3xl bg-primary text-on-accent shadow-float"><Sparkles className="size-7" /></div>
-            <h2 className="mt-5 font-display text-2xl font-bold tracking-tight">What would you like to know?</h2>
-            <p className="mt-2 max-w-sm text-sm text-muted-foreground">Answers come from your demo data on this device. No AI service is called.</p>
-            <Link to="/connections" className="card-orbit mt-6 flex w-full max-w-md items-center gap-3 p-4 text-left">
-              <span className="grid size-11 place-items-center rounded-2xl bg-surface-2"><Laptop className="size-5 text-muted-foreground" /></span>
-              <div className="flex-1"><p className="font-semibold">Laptop agent</p><p className="text-xs text-muted-foreground">Offline — not connected</p></div>
-              <span className="text-xs font-semibold text-primary">Set up</span>
-            </Link>
-            <div className="mt-6 grid w-full max-w-md gap-2 sm:grid-cols-2">
-              {QUICK_PROMPTS.map((p) => (
-                <Button variant="ghost" key={p} onClick={() => send(p)} className="h-auto min-h-12 whitespace-normal rounded-2xl border bg-surface px-4 py-3 text-left text-sm font-semibold hover:border-primary/50">{p}</Button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {msgs.map((m) => <Bubble key={m.id} m={m} onRetry={() => retry(m.id)} />)}
-            {typing && (
-              <div className="flex gap-3" aria-label="Orbit is typing">
-                <span className="grid size-8 place-items-center rounded-xl bg-primary/15 text-primary"><Sparkles className="size-4" /></span>
-                <div className="flex items-center gap-1 rounded-3xl rounded-tl-lg border bg-surface px-4 py-4">
-                  {[0, 1, 2].map((i) => <span key={i} className="animate-typing size-2 rounded-full bg-muted-foreground" style={{ animationDelay: `${i * 0.15}s` }} />)}
-                </div>
-              </div>
-            )}
-            {!typing && (
-              <div className="no-scrollbar flex gap-2 overflow-x-auto pt-2">
-                {QUICK_PROMPTS.map((p) => <Button variant="ghost" key={p} onClick={() => send(p)} className="min-h-10 shrink-0 rounded-full border px-3 text-xs font-semibold text-muted-foreground hover:text-foreground">{p}</Button>)}
-              </div>
-            )}
-          </div>
-        )}
-        <div ref={end} />
-      </div>
-
-      <form onSubmit={(e) => { e.preventDefault(); send(text); }} className="sticky bottom-[calc(6.25rem+env(safe-area-inset-bottom))] z-10 lg:bottom-6">
-        <div className="glass shadow-float flex items-end gap-2 rounded-[24px] border p-2">
-          <label htmlFor="composer" className="sr-only">Message Orbit</label>
-          <textarea
-            id="composer"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
-            rows={1}
-            placeholder="Ask Orbit anything…"
-            className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] outline-none placeholder:text-muted-foreground"
-          />
-          <Button variant="ghost" type="submit" disabled={!text.trim() || typing} className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-30" aria-label="Send message"><ArrowUp className="size-5" /></Button>
+  return <div className="orbit-chat-area chat-workspace">
+    <header className="chat-topbar">
+      <div className="chat-title-group"><span className="chat-logo"><Orbit /></span><div><h1>Orbit Intelligence</h1><div className="chat-demo-label"><span className="chat-status-dot" />Demo assistant · on this device</div></div></div>
+      <div className="chat-toolbar"><Link to="/connections" className="chat-offline"><Laptop />Laptop Agent · offline</Link><Button className="chat-new" onClick={newChat} aria-label="New chat — clear conversation" title="New chat — clears this conversation"><Plus /><span className="chat-new-text">New chat</span></Button></div>
+    </header>
+    <div className="chat-columns">
+      <aside className="chat-history" aria-label="Current conversation history">
+        <div className="chat-history-label">IN THIS CONVERSATION</div>
+        {history.length ? history.map((message) => <Button key={message.id} variant="ghost" className="chat-history-item" onClick={() => document.getElementById(`message-${message.id}`)?.scrollIntoView({ behavior: "auto", block: "center" })}><MessageSquare />{message.text.length > 65 ? `${message.text.slice(0, 65)}…` : message.text}</Button>) : <p className="chat-history-empty">Your conversation will appear here.</p>}
+        <div className="chat-history-label">QUICK SHORTCUTS</div>
+        {SUGGESTIONS.slice(0, 3).map((item) => <Button variant="ghost" className="chat-history-item" key={item.title} disabled={typing} onClick={() => send(item.prompt)}><item.icon />{item.subtitle}</Button>)}
+        <div className="chat-history-footer"><ShieldCheck className="size-4 mb-2" />One conversation, saved on this device. New chat clears it. No AI service or external tool is connected.</div>
+      </aside>
+      <section className="chat-conversation" aria-label="Chat conversation">
+        <div className="chat-messages" role="log" aria-live="polite" aria-relevant="additions">
+          {msgs.length === 0 ? <div className="chat-empty">
+            <div className="chat-empty-art"><ChatArt /></div>
+            <div className="chat-eyebrow">A LITTLE SPACE TO THINK</div>
+            <h2>Your day. A clearer picture.</h2>
+            <p className="chat-empty-sub">Movement, money, and ideas — brought together in one conversation.</p>
+            <div className="chat-suggestions">{SUGGESTIONS.map((item) => <Button variant="ghost" className="chat-suggestion" key={item.title} onClick={() => send(item.prompt)}><item.icon /><div><span>{item.title}</span><br /><small>{item.subtitle}</small></div></Button>)}</div>
+          </div> : msgs.map((message) => <MessageBubble key={message.id} message={message} onRetry={() => retry(message.id)} busy={typing} />)}
+          {typing && <div className="chat-thinking" role="status"><Orbit className="size-5 text-primary" /><span className="chat-thinking-line" aria-hidden="true" />Putting your sample data together…</div>}
+          <div ref={end} />
         </div>
-      </form>
-    </Page>
-  );
+        <div className="chat-composer-wrap">
+          <form className="chat-composer" onSubmit={(e) => { e.preventDefault(); send(text); }}>
+            <label className="sr-only" htmlFor="composer">Message Orbit</label>
+            <textarea ref={composer} id="composer" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(text); } }} rows={2} placeholder="What's on your mind?" />
+            <div className="chat-composer-controls"><span className="chat-composer-hint"><ShieldCheck className="size-3" />Local demo · not live AI</span><div className="chat-composer-buttons"><Button id="chat-voice-trigger" type="button" variant="ghost" className="chat-icon" disabled={typing} onClick={() => setVoiceOpen(true)} aria-label="Open voice mode" title="Voice preview"><Mic /></Button><Button type="submit" variant="ghost" className="chat-icon chat-send" disabled={!text.trim() || typing} aria-label="Send message"><ArrowUp /></Button></div></div>
+          </form>
+          {msgs.length > 0 && <div className="chat-followups">{SUGGESTIONS.slice(0, 3).map((item) => <Button variant="ghost" className="chat-chip" key={item.title} disabled={typing} onClick={() => send(item.prompt)}><item.icon />{item.subtitle}</Button>)}</div>}
+          <p className="chat-bottom-note">Synthetic data only. Laptop Agent is offline. Voice is a simulated preview.</p>
+        </div>
+      </section>
+    </div>
+    <VoiceMode open={voiceOpen} onClose={closeVoice} onSend={send} />
+  </div>;
 }

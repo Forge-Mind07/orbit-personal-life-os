@@ -1,4 +1,6 @@
 # ORBIT redesign
+- [x] Redesign Chat only with scoped midnight styling, real single-conversation history, and rich demo replies.
+- [x] Add accessible simulated voice mode; verify sending, editing, cancelling, persistence, navigation and mobile/desktop layouts.
 - [x] Restyle Feed and reader with scoped editorial visuals and functional carousels, search and personalized demo briefing.
 - [x] Verify Feed filters, bookmarks, briefing actions, reader sharing and mobile/desktop layouts.
 - [x] Create expressive original Pace artwork and contextual interactions in Health and the activity preview.

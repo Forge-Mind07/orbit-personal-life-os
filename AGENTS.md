@@ -38,3 +38,4 @@ use the editor.
 - Shared editorial thumbnails use deterministic vector signal artwork; Feed uses its own original topic-based vector scenes, keeping all demo media offline and avoiding copied assets.
 - Feed and reader override tokens only inside `.orbit-feed`; Feed owns its scoped layout and motion so the editorial identity never restyles other modules or navigation.
 - Pace uses one reusable layered SVG and event-driven animation controller; contextual mood stays pure in the domain layer and wardrobe preferences stay in the existing ORBIT store, so previews never mutate activity totals.
+- Chat owns its dark tokens and local ribbon artwork inside `.orbit-chat-area`, including portal voice dialogs; it uses the existing single persisted conversation, and voice timers simulate text only without requesting microphone access.
