@@ -188,9 +188,9 @@ export function YearView() {
         </div>
         <div className="mt-4 h-48" role="img" aria-label={`Goal completion rate by month. Overall ${rate}% over the last 12 months.`}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
+            <BarChart data={data} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="label" tick={axis} axisLine={false} tickLine={false} interval={1} />
-              <YAxis tick={axis} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={44} domain={[0, 100]} />
+              <YAxis tick={axis} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={40} domain={[0, 100]} />
               <Tooltip cursor={{ fill: "var(--track)", radius: 8 }} content={<ChartTooltip format={(v) => `${v}% of eligible days`} />} />
               <Bar dataKey="completionRate" radius={[8, 8, 8, 8]} maxBarSize={20}>
                 {data.map((d, i) => <Cell key={d.month} fill={i === data.length - 1 ? "var(--primary)" : "var(--health)"} />)}

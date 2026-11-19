@@ -172,9 +172,9 @@ const PERIODS: Record<Period, { n: number; stepDays: number; startFrac: number }
 };
 
 /** Deterministic sample snapshots that always end exactly at the current value. */
-export function valueSeries(key: string, current: number, period: Period, today: ISODate) {
+export function valueSeries(key: string, current: number, period: Period, today: ISODate, startValue?: number) {
   const { n, stepDays, startFrac } = PERIODS[period];
-  const start = current * startFrac;
+  const start = startValue ?? current * startFrac;
   return Array.from({ length: n }, (_, i) => {
     const t = i / (n - 1);
     const wiggle = i === n - 1 ? 0 : (hash01(`${key}:${period}:${i}`) - 0.5) * current * 0.03 * Math.sin(Math.PI * t + 0.3);

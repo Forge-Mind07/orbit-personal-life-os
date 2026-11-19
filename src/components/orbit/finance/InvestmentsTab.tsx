@@ -102,7 +102,7 @@ export function InvestmentsTab() {
         <div className="card-orbit divide-y overflow-hidden">
           {HOLDINGS.map((h) => {
             const pnl = holdingValue(h) - holdingInvested(h);
-            const s = valueSeries(h.symbol, h.ltp, "1M", today).map((x) => x.value);
+            const s = valueSeries(h.symbol, h.ltp, "1M", today, h.ltp + (h.avgPrice - h.ltp) * 0.4).map((x) => x.value);
             return (
               <button key={h.symbol} onClick={() => setSel(h)} className="flex w-full items-center gap-3 px-5 py-3.5 text-left hover:bg-surface-2/40">
                 <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface-2 font-display text-xs font-bold">{h.symbol.slice(0, 2)}</span>
@@ -132,7 +132,7 @@ export function InvestmentsTab() {
 
 function HoldingDetail({ h }: { h: Holding }) {
   const { today } = useOrbit();
-  const series = valueSeries(h.symbol, h.ltp, "3M", today);
+  const series = valueSeries(h.symbol, h.ltp, "3M", today, h.avgPrice);
   const value = holdingValue(h);
   const inv = holdingInvested(h);
   const pnl = value - inv;
